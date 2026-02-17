@@ -38,39 +38,31 @@ export const AuthProvider = ({ children }) => {
     }, [token]);
 
     const login = async (email, password) => {
-        const response = await fetch('http://localhost:8081/api/auth/login', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ email, password }),
-        });
-        if (!response.ok) {
-            const error = await response.json();
-            throw new Error(error.error || 'Login failed');
+        try {
+            const response = await api.post('/auth/login', { email, password });
+            const data = response.data;
+            sessionStorage.setItem('token', data.token);
+            sessionStorage.setItem('user', JSON.stringify(data)); // Store full user object
+            setToken(data.token);
+            setUser(data);
+        } catch (error) {
+            throw new Error(error.response?.data?.error || 'Login failed');
         }
-        const data = await response.json();
-        sessionStorage.setItem('token', data.token);
-        sessionStorage.setItem('user', JSON.stringify(data)); // Store full user object
-        setToken(data.token);
-        setUser(data);
     };
 
     const signup = async (fullName, email, password) => {
-        const response = await fetch('http://localhost:8081/api/auth/register', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ fullName, email, password }),
-        });
-        if (!response.ok) {
-            const error = await response.json();
-            throw new Error(error.error || 'Signup failed');
+        try {
+            const response = await api.post('/auth/register', { fullName, email, password });
+            const data = response.data;
+            sessionStorage.setItem('token', data.token);
+            // Backend for register currently only returns token, so we construct user object
+            const userObj = { token: data.token, email, fullName };
+            sessionStorage.setItem('user', JSON.stringify(userObj));
+            setToken(data.token);
+            setUser(userObj);
+        } catch (error) {
+            throw new Error(error.response?.data?.error || 'Signup failed');
         }
-        const data = await response.json();
-        sessionStorage.setItem('token', data.token);
-        // Backend for register currently only returns token, so we construct user object
-        const userObj = { token: data.token, email, fullName };
-        sessionStorage.setItem('user', JSON.stringify(userObj));
-        setToken(data.token);
-        setUser(userObj);
     };
 
     const updateUser = (userData) => {
