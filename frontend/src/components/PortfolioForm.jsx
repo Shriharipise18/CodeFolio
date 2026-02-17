@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import api from '../services/api';
 
 const PortfolioForm = ({
     initialData = {},
@@ -106,14 +107,13 @@ const PortfolioForm = ({
         uploadData.append('file', file);
 
         try {
-            const response = await fetch('http://localhost:8081/api/ai/parse-resume', {
-                method: 'POST',
-                body: uploadData,
+            const response = await api.post('/ai/parse-resume', uploadData, {
+                headers: {
+                    'Content-Type': 'multipart/form-data',
+                },
             });
 
-            if (!response.ok) throw new Error('Failed to parse resume');
-
-            const data = await response.json();
+            const data = response.data;
 
             setFormData(prev => ({
                 ...prev,
@@ -141,14 +141,8 @@ const PortfolioForm = ({
     const handleAnalyze = async () => {
         setIsAnalyzing(true);
         try {
-            const response = await fetch('http://localhost:8081/api/ai/analyze-profile', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-                body: JSON.stringify(formData),
-            });
-            const data = await response.json();
+            const response = await api.post('/ai/analyze-profile', formData);
+            const data = response.data;
             setAnalysis(data);
         } catch (error) {
             console.error("Analysis failed", error);
