@@ -461,84 +461,98 @@ const ProfilePage = () => {
                                     )}
                                 </div>
 
-                                {/* Results Card */}
-                                {analysisResult && (
-                                    <div className="analysis-result-card">
-                                        <div className="result-header">
-                                            <div>
-                                                <div className="data-label">Overall Match Score</div>
-                                                <div className="score-display">
-                                                    <span className={`score-val ${analysisResult.matchScore >= 80 ? 'score-high' : analysisResult.matchScore >= 50 ? 'score-med' : 'score-low'
-                                                        }`}>
-                                                        {analysisResult.matchScore}
-                                                    </span>
-                                                    <span className="score-max">/ 100</span>
-                                                </div>
-                                            </div>
-                                            {analysisResult.id && (
-                                                <button onClick={downloadReport} className="btn-download">
-                                                    <Download size={14} />
-                                                    Download Report
-                                                </button>
-                                            )}
-                                        </div>
-
-                                        <div className="result-body">
-                                            {analysisResult.summary && (
-                                                <div className="summary-text">
-                                                    {analysisResult.summary}
-                                                </div>
-                                            )}
-
-                                            <div className="insights-grid">
-                                                {/* Strengths */}
-                                                <div className="insight-col">
-                                                    <h4 className="text-success">
-                                                        <CheckCircle size={16} /> Key Strengths
-                                                    </h4>
-                                                    <ul className="insight-list">
-                                                        {analysisResult.strengths?.map((item, i) => (
-                                                            <li key={i} className="insight-item">
-                                                                <div className="bullet bullet-success"></div>
-                                                                {item}
-                                                            </li>
-                                                        ))}
-                                                    </ul>
-                                                </div>
-
-                                                {/* Weaknesses */}
-                                                <div className="insight-col">
-                                                    <h4 className="text-danger">
-                                                        <AlertCircle size={16} /> Areas for Improvement
-                                                    </h4>
-                                                    <ul className="insight-list">
-                                                        {analysisResult.weaknesses?.map((item, i) => (
-                                                            <li key={i} className="insight-item">
-                                                                <div className="bullet bullet-danger"></div>
-                                                                {item}
-                                                            </li>
-                                                        ))}
-                                                    </ul>
+                                {/* Results Section */}
+                                {analysisResult ? (
+                                    <div className="analysis-result-card fade-in">
+                                        {/* Portfolio Health Card */}
+                                        <div className="health-score-card">
+                                            <div className="health-header">
+                                                <h3>Portfolio Health Score</h3>
+                                                <div className={`health-badge ${analysisResult.matchScore >= 80 ? 'health-high' : analysisResult.matchScore >= 50 ? 'health-med' : 'health-low'}`}>
+                                                    {analysisResult.matchScore}/100
                                                 </div>
                                             </div>
 
-                                            {/* Tips */}
+                                            <div className="health-metrics">
+                                                {/* Skills Match */}
+                                                <div className="metric-row">
+                                                    <div className="metric-info">
+                                                        <span>Skills Match</span>
+                                                        <span className="metric-val">{analysisResult.sectionScores?.Skills || 0}%</span>
+                                                    </div>
+                                                    <div className="progress-bar-container">
+                                                        <div
+                                                            className="progress-fill fill-blue"
+                                                            style={{ width: `${analysisResult.sectionScores?.Skills || 0}%` }}
+                                                        ></div>
+                                                    </div>
+                                                </div>
+
+                                                {/* Project Quality */}
+                                                <div className="metric-row">
+                                                    <div className="metric-info">
+                                                        <span>Project Quality</span>
+                                                        <span className="metric-val">{analysisResult.sectionScores?.Projects || 0}%</span>
+                                                    </div>
+                                                    <div className="progress-bar-container">
+                                                        <div
+                                                            className="progress-fill fill-purple"
+                                                            style={{ width: `${analysisResult.sectionScores?.Projects || 0}%` }}
+                                                        ></div>
+                                                    </div>
+                                                </div>
+                                            </div>
+
+                                            {/* Optimization Tip */}
                                             {analysisResult.improvementTips?.length > 0 && (
-                                                <div className="tips-box">
-                                                    <h4 className="tips-title">
-                                                        <TrendingUp size={16} /> Improvement Tips
-                                                    </h4>
-                                                    <div>
-                                                        {analysisResult.improvementTips.map((tip, i) => (
-                                                            <div key={i} className="tip-item">
-                                                                <span className="tip-num">{i + 1}.</span>
-                                                                <span>{tip}</span>
-                                                            </div>
-                                                        ))}
+                                                <div className="optimization-tip-box">
+                                                    <div className="tip-icon">💡</div>
+                                                    <div className="tip-content">
+                                                        <strong>Optimization Tip:</strong> {analysisResult.improvementTips[0]}
                                                     </div>
                                                 </div>
                                             )}
                                         </div>
+
+                                        {/* Detailed Insights */}
+                                        <div className="result-body">
+                                            <div className="insights-grid">
+                                                <div className="insight-col">
+                                                    <h4 className="text-success"><CheckCircle size={16} /> Key Strengths</h4>
+                                                    <ul className="insight-list">
+                                                        {analysisResult.strengths?.slice(0, 3).map((item, i) => (
+                                                            <li key={i} className="insight-item">
+                                                                <div className="bullet bullet-success"></div>{item}
+                                                            </li>
+                                                        ))}
+                                                    </ul>
+                                                </div>
+                                                <div className="insight-col">
+                                                    <h4 className="text-danger"><AlertCircle size={16} /> Improvements</h4>
+                                                    <ul className="insight-list">
+                                                        {analysisResult.weaknesses?.slice(0, 3).map((item, i) => (
+                                                            <li key={i} className="insight-item">
+                                                                <div className="bullet bullet-danger"></div>{item}
+                                                            </li>
+                                                        ))}
+                                                    </ul>
+                                                </div>
+                                            </div>
+
+                                            {analysisResult.id && (
+                                                <div style={{ marginTop: '1.5rem', display: 'flex', justifyContent: 'center' }}>
+                                                    <button onClick={downloadReport} className="btn-download">
+                                                        <Download size={14} /> Download Full Report
+                                                    </button>
+                                                </div>
+                                            )}
+                                        </div>
+                                    </div>
+                                ) : (
+                                    <div className="empty-analysis-state">
+                                        <TrendingUp size={48} className="empty-icon" />
+                                        <h3>Ready to Evaluate?</h3>
+                                        <p>Enter a target role above to see your <strong>Portfolio Health Score</strong> and get AI-powered improvement tips.</p>
                                     </div>
                                 )}
                             </div>
