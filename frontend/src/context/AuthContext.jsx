@@ -46,7 +46,11 @@ export const AuthProvider = ({ children }) => {
             setToken(data.token);
             setUser(data);
         } catch (error) {
-            throw new Error(error.response?.data?.error || 'Login failed');
+            console.error("Login Error Details:", error);
+            if (error.code === 'ERR_NETWORK') {
+                throw new Error('Cannot connect to server. Please check if backend is running.');
+            }
+            throw new Error(error.response?.data?.error || 'Login failed. Please check your credentials.');
         }
     };
 
