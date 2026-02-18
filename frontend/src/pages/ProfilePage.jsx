@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useRef } from 'react';
 import { useAuth } from '../context/AuthContext';
 import api from '../services/api';
 import { useNavigate } from 'react-router-dom';
@@ -14,6 +14,7 @@ const ProfilePage = () => {
     const navigate = useNavigate();
     const [stats, setStats] = useState({ totalPortfolios: 0, loading: true });
     const [activeTab, setActiveTab] = useState('overview'); // overview, resume, analysis
+    const fileInputRef = useRef(null);
 
     // Edit Profile State
     const [isEditing, setIsEditing] = useState(false);
@@ -347,12 +348,23 @@ const ProfilePage = () => {
                                 <h3>Update Resume</h3>
                                 <p>Upload your latest PDF resume to verify skills and get personalized job analysis scores.</p>
                             </div>
-                            <label className="upload-btn-wrapper">
-                                <button className="btn-upload" disabled={resumeLoading}>
+                            <div className="upload-btn-wrapper">
+                                <button
+                                    className="btn-upload"
+                                    disabled={resumeLoading}
+                                    onClick={() => fileInputRef.current.click()}
+                                >
                                     {resumeLoading ? 'Parsing...' : <><Upload size={16} style={{ marginRight: '8px' }} /> Upload PDF</>}
                                 </button>
-                                <input type="file" accept=".pdf" onChange={handleResumeUpload} className="hidden-input" disabled={resumeLoading} />
-                            </label>
+                                <input
+                                    type="file"
+                                    accept=".pdf"
+                                    onChange={handleResumeUpload}
+                                    ref={fileInputRef}
+                                    style={{ display: 'none' }}
+                                    disabled={resumeLoading}
+                                />
+                            </div>
                         </div>
 
                         {/* TAB CONTENT: Overview */}
