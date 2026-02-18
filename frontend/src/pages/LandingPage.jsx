@@ -37,38 +37,28 @@ const LandingPage = () => {
                         </Link>
                     </div>
 
-                    {/* Dashboard Preview */}
+                    {/* Terminal Preview */}
                     <div className="hero-preview">
-                        <div className="preview-frame">
-                            <div className="browser-mockup">
-                                {/* Fake Browser Header */}
-                                <div className="browser-header">
-                                    <div className="window-controls">
-                                        <div className="control red"></div>
-                                        <div className="control yellow"></div>
-                                        <div className="control green"></div>
-                                    </div>
-                                    <div className="address-bar"></div>
+                        <div className="terminal-window">
+                            <div className="terminal-header">
+                                <div className="terminal-buttons">
+                                    <span className="t-btn red"></span>
+                                    <span className="t-btn yellow"></span>
+                                    <span className="t-btn green"></span>
                                 </div>
-                                {/* Preview Content */}
-                                <div className="preview-content">
-                                    <div className="sidebar">
-                                        <div className="avatar"></div>
-                                        <div className="skeleton-line long"></div>
-                                        <div className="skeleton-line short"></div>
-                                    </div>
-                                    <div className="main-area">
-                                        <div className="skeleton-hero"></div>
-                                        <div className="skeleton-grid">
-                                            <div className="skeleton-card"></div>
-                                            <div className="skeleton-card"></div>
-                                        </div>
-                                    </div>
+                                <div className="terminal-title">portfolio-ai-cli — v2.0.4</div>
+                            </div>
+                            <div className="terminal-body">
+                                <div className="cmd-line">
+                                    <span className="cmd-prompt">➜</span> <span className="cmd-path">~</span> <span className="cmd-text">npx create-portfolio resume.pdf</span>
                                 </div>
-                                <div className="preview-overlay">
-                                    <div className="overlay-badge">
-                                        Live Interactive Preview
-                                    </div>
+                                <div className="cmd-output">
+                                    <div className="log-line">ℹ  Parsing PDF structure... <span className="text-green">Done</span></div>
+                                    <div className="log-line">ℹ  Extracting skills & experience... <span className="text-green">Done</span></div>
+                                    <div className="log-line">ℹ  Generating custom bio... <span className="text-green">Done</span></div>
+                                    <div className="log-line">ℹ  Building React components... <span className="text-green">Done</span></div>
+                                    <div className="log-line">✔  <span className="text-green">Success!</span> Your portfolio is live:</div>
+                                    <div className="log-line link">https://portfolio.ai/u/alex-dev</div>
                                 </div>
                             </div>
                         </div>

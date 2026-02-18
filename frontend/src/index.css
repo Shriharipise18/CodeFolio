@@ -739,3 +739,143 @@ ul {
   background-color: #fef2f2;
   color: #dc2626;
 }
+
+/* Terminal Animation - Landing Page */
+.terminal-window {
+  width: 100%;
+  max-width: 600px;
+  background-color: #1e1e1e;
+  border-radius: 8px;
+  box-shadow: 0 20px 50px rgba(0, 0, 0, 0.3);
+  overflow: hidden;
+  font-family: 'Fira Code', monospace;
+  margin: 0 auto;
+}
+
+.terminal-header {
+  background-color: #2d2d2d;
+  padding: 10px 16px;
+  display: flex;
+  align-items: center;
+  border-bottom: 1px solid #333;
+  position: relative;
+}
+
+.terminal-buttons {
+  display: flex;
+  gap: 8px;
+}
+
+.t-btn {
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+}
+
+.t-btn.red {
+  background-color: #ff5f56;
+}
+
+.t-btn.yellow {
+  background-color: #ffbd2e;
+}
+
+.t-btn.green {
+  background-color: #27c93f;
+}
+
+.terminal-title {
+  position: absolute;
+  left: 0;
+  right: 0;
+  text-align: center;
+  color: #888;
+  font-size: 0.8rem;
+  font-family: -apple-system, BlinkMacSystemFont, sans-serif;
+  user-select: none;
+}
+
+.terminal-body {
+  padding: 20px;
+  color: #d4d4d4;
+  font-size: 0.9rem;
+  line-height: 1.6;
+}
+
+.cmd-line {
+  margin-bottom: 16px;
+  display: flex;
+  gap: 10px;
+}
+
+.cmd-prompt {
+  color: #27c93f;
+  font-weight: bold;
+}
+
+.cmd-path {
+  color: #57c7ff;
+  font-weight: bold;
+}
+
+.cmd-text {
+  color: #fff;
+}
+
+.cmd-output {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.log-line {
+  opacity: 0;
+  animation: fadeInLog 0.5s forwards;
+}
+
+.log-line:nth-child(1) {
+  animation-delay: 0.5s;
+}
+
+.log-line:nth-child(2) {
+  animation-delay: 1.2s;
+}
+
+.log-line:nth-child(3) {
+  animation-delay: 2.0s;
+}
+
+.log-line:nth-child(4) {
+  animation-delay: 3.2s;
+}
+
+.log-line:nth-child(5) {
+  animation-delay: 4.5s;
+}
+
+.log-line:nth-child(6) {
+  animation-delay: 4.8s;
+}
+
+.log-line.link {
+  color: #57c7ff;
+  text-decoration: underline;
+  cursor: pointer;
+}
+
+.text-green {
+  color: #27c93f;
+  font-weight: bold;
+}
+
+@keyframes fadeInLog {
+  from {
+    opacity: 0;
+    transform: translateY(5px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
