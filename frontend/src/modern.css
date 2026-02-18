@@ -228,7 +228,7 @@ svg {
     display: flex !important;
     align-items: center;
     justify-content: space-between;
-    height: 70px;
+    height: 90px;
     width: 100%;
     max-width: var(--container-max-width);
     margin: 0 auto;

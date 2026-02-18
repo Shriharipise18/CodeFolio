@@ -18,7 +18,7 @@ const Layout = () => {
             <header className="app-navbar">
                 <div className="app-navbar-container">
                     <Link to="/" className="app-navbar-brand" style={{ display: 'flex', alignItems: 'center' }}>
-                        <img src={Logo} alt="CodeFolio" style={{ height: '50px', width: 'auto', display: 'block' }} />
+                        <img src={Logo} alt="CodeFolio" style={{ height: '80px', width: 'auto', display: 'block' }} />
                     </Link>
 
                     <nav className="app-navbar-menu">
@@ -89,7 +89,7 @@ const Layout = () => {
                     <div className="footer-grid">
                         <div className="footer-brand">
                             <Link to="/" className="footer-logo">
-                                <img src={Logo} alt="CodeFolio" style={{ height: '32px', width: 'auto' }} />
+                                <img src={Logo} alt="CodeFolio" style={{ height: '40px', width: 'auto' }} />
                             </Link>
                             <p className="footer-desc">
                                 The smartest way for developers to build, host, and share professional portfolios.
