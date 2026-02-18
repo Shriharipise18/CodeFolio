@@ -165,68 +165,7 @@ const LandingPage = () => {
                 </div>
             </section>
 
-            {/* AI Analysis Feature */}
-            <section className="section section-analysis">
-                <div className="container">
-                    <div className="split-layout">
-                        <div className="split-media">
-                            <div className="analysis-card">
-                                <div className="card-header">
-                                    <h4 className="card-title">Portfolio Health Score</h4>
-                                    <span className="score-badge">92/100</span>
-                                </div>
-                                <div className="card-body-stack">
-                                    <div className="metric-row">
-                                        <div className="metric-label">
-                                            <span>Skills Match</span>
-                                            <span className="metric-val">95%</span>
-                                        </div>
-                                        <div className="progress-bar"><div className="progress-fill fill-blue" style={{ width: '95%' }}></div></div>
-                                    </div>
-                                    <div className="metric-row">
-                                        <div className="metric-label">
-                                            <span>Project Quality</span>
-                                            <span className="metric-val">88%</span>
-                                        </div>
-                                        <div className="progress-bar"><div className="progress-fill fill-indigo" style={{ width: '88%' }}></div></div>
-                                    </div>
-                                    <div className="tip-box">
-                                        <strong>💡 Optimization Tip:</strong> Add more quantitative metrics to your "Project Alpha" description.
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
 
-                        <div className="split-content">
-                            <div className="feature-pill">
-                                📈 AI Analytics
-                            </div>
-                            <h2 className="section-title split-title">Know exactly how you stack up.</h2>
-                            <p className="split-desc">
-                                Our bespoke AI doesn't just build your portfolio; it analyzes it locally against industry standards.
-                                Get real-time feedback on your skills, project descriptions, and overall hireability score.
-                            </p>
-                            <ul className="check-list">
-                                <li>
-                                    <span className="check-icon">✓</span>
-                                    Keyword optimization for ATS
-                                </li>
-                                <li>
-                                    <span className="check-icon">✓</span>
-                                    Skill gap analysis
-                                </li>
-                                <li>
-                                    <span className="check-icon">✓</span>
-                                    Actionable improvement tips
-                                </li>
-                            </ul>
-                            <Link to={user ? "/create" : "/login"} className="btn btn-primary btn-large">
-                                Analyze My Profile
-                            </Link>
-                        </div>
-                    </div>
-                </div>
-            </section>
 
             {/* Final CTA */}
             <section className="section section-cta">
