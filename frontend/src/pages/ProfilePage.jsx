@@ -143,7 +143,7 @@ const ProfilePage = () => {
             // New endpoint to upload and save to profile
             // CORRECT: Do NOT set Content-Type manually. Let browser set it with boundary.
             // BUT: We DO need to set the Authorization header explicitly if the interceptor isn't catching it.
-            const token = localStorage.getItem('token');
+            const token = sessionStorage.getItem('token');
             console.log("Uploading resume with token:", token ? "Present" : "Missing"); // Debug log
 
             if (!token) {
@@ -433,7 +433,7 @@ const ProfilePage = () => {
                                                     <button
                                                         onClick={async () => {
                                                             try {
-                                                                const token = localStorage.getItem('token');
+                                                                const token = sessionStorage.getItem('token');
                                                                 const response = await axios.get(`http://localhost:8081/api/resume/analyze/${analysisResult.id}/download`, {
                                                                     headers: { 'Authorization': `Bearer ${token}` },
                                                                     responseType: 'blob'
