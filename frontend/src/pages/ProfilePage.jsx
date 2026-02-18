@@ -3,10 +3,11 @@ import { useAuth } from '../context/AuthContext';
 import api from '../services/api';
 import { useNavigate } from 'react-router-dom';
 import {
-    User, Mail, Phone, MapPin, Edit2, Upload, FileText,
+    User, Mail, Edit2, Upload, FileText,
     CheckCircle, AlertCircle, TrendingUp, Download, Briefcase,
-    Code, Layers, Award, LogOut, ChevronRight
+    LogOut, ChevronRight
 } from 'lucide-react';
+import './ProfilePage.css'; // Import the new CSS file
 
 const ProfilePage = () => {
     const { user, logout, updateUser } = useAuth();
@@ -124,7 +125,7 @@ const ProfilePage = () => {
             });
 
             setResumeMessage({ type: 'success', text: 'Resume parsed securely!' });
-            setActiveTab('resume'); // Switch to resume tab to show data
+            setActiveTab('resume');
         } catch (error) {
             console.error("Resume upload failed", error);
             setResumeMessage({
@@ -190,82 +191,71 @@ const ProfilePage = () => {
     };
 
     if (!user) return (
-        <div className="flex justify-center items-center h-screen bg-slate-50">
-            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-indigo-600"></div>
+        <div className="loader-container">
+            <div className="spinner"></div>
         </div>
     );
 
     return (
-        <div className="min-h-screen bg-slate-50 py-12 px-4 sm:px-6 lg:px-8 font-sans">
-            <div className="max-w-7xl mx-auto">
+        <div className="profile-container">
+            <div className="profile-content-wrapper">
 
                 {/* Header Section */}
-                <div className="mb-8 flex flex-col md:flex-row md:items-center justify-between gap-4">
-                    <div>
-                        <h1 className="text-3xl font-bold text-slate-900">
-                            Welcome back, {user.fullName?.split(' ')[0] || 'User'}! 👋
-                        </h1>
-                        <p className="text-slate-500 mt-1">Manage your profile, analyze your resume, and track your progress.</p>
+                <div className="profile-header">
+                    <div className="profile-welcome">
+                        <h1>Welcome back, {user.fullName?.split(' ')[0] || 'User'}! 👋</h1>
+                        <p>Manage your profile, analyze your resume, and track your progress.</p>
                     </div>
-                    <div className="flex items-center gap-3">
-                        <button
-                            onClick={handleLogout}
-                            className="inline-flex items-center px-4 py-2 border border-slate-300 rounded-lg text-sm font-medium text-slate-700 bg-white hover:bg-slate-50 transition-colors"
-                        >
-                            <LogOut className="w-4 h-4 mr-2" />
+                    <div>
+                        <button onClick={handleLogout} className="btn-logout">
+                            <LogOut className="btn-icon" />
                             Sign Out
                         </button>
                     </div>
                 </div>
 
-                <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
+                <div className="profile-grid">
 
                     {/* LEFT COLUMN: Profile Card & Navigation */}
-                    <div className="lg:col-span-4 space-y-6">
+                    <div className="profile-sidebar">
 
                         {/* Profile Card */}
-                        <div className="bg-white rounded-2xl shadow-sm border border-slate-200 overflow-hidden">
-                            <div className="h-24 bg-gradient-to-r from-indigo-500 to-purple-600"></div>
-                            <div className="px-6 pb-6 mt-[-40px]">
-                                <div className="relative inline-block">
-                                    <div className="w-20 h-20 rounded-full bg-white p-1 shadow-md">
-                                        <div className="w-full h-full rounded-full bg-slate-100 flex items-center justify-center text-2xl font-bold text-indigo-600 uppercase">
+                        <div className="profile-card">
+                            <div className="profile-card-header-bg"></div>
+                            <div className="profile-card-content">
+                                <div className="avatar-container">
+                                    <div className="avatar-circle">
+                                        <div className="avatar-initial">
                                             {user.fullName ? user.fullName.charAt(0) : 'U'}
                                         </div>
                                     </div>
                                     {!isEditing && (
-                                        <button
-                                            onClick={handleEditClick}
-                                            className="absolute bottom-0 right-0 p-1.5 bg-indigo-600 text-white rounded-full shadow-lg hover:bg-indigo-700 transition-colors"
-                                            title="Edit Profile"
-                                        >
-                                            <Edit2 className="w-3.5 h-3.5" />
+                                        <button onClick={handleEditClick} className="edit-trigger-btn" title="Edit Profile">
+                                            <Edit2 size={14} />
                                         </button>
                                     )}
                                 </div>
 
                                 {!isEditing ? (
-                                    <div className="mt-3">
-                                        <h2 className="text-xl font-bold text-slate-900">{user.fullName || 'Guest User'}</h2>
-                                        <div className="flex items-center text-slate-500 text-sm mt-1">
-                                            <Mail className="w-3.5 h-3.5 mr-1.5" />
+                                    <div>
+                                        <h2 className="profile-name">{user.fullName || 'Guest User'}</h2>
+                                        <div className="profile-email">
+                                            <Mail size={14} />
                                             {user.email}
                                         </div>
-                                        <div className="mt-4 flex items-center gap-2">
-                                            <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800">
-                                                <div className="w-1.5 h-1.5 rounded-full bg-green-500 mr-1.5"></div>
-                                                Active Account
-                                            </span>
+                                        <div className="status-badge">
+                                            <div className="status-dot"></div>
+                                            Active Account
                                         </div>
                                     </div>
                                 ) : (
-                                    <form onSubmit={handleSubmit} className="mt-4 space-y-3">
+                                    <form onSubmit={handleSubmit} className="profile-edit-form">
                                         <input
                                             type="text"
                                             name="fullName"
                                             value={formData.fullName}
                                             onChange={handleChange}
-                                            className="block w-full rounded-md border-slate-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm px-3 py-2 border"
+                                            className="form-input-styled"
                                             placeholder="Full Name"
                                             required
                                         />
@@ -274,14 +264,14 @@ const ProfilePage = () => {
                                             name="password"
                                             value={formData.password}
                                             onChange={handleChange}
-                                            className="block w-full rounded-md border-slate-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm px-3 py-2 border"
+                                            className="form-input-styled"
                                             placeholder="New Password (optional)"
                                         />
-                                        <div className="flex gap-2 pt-2">
-                                            <button type="submit" disabled={loadingUpdate} className="flex-1 bg-indigo-600 text-white py-1.5 rounded-md text-sm font-medium hover:bg-indigo-700">
+                                        <div className="form-actions">
+                                            <button type="submit" disabled={loadingUpdate} className="btn-save-sm">
                                                 {loadingUpdate ? 'Saving...' : 'Save'}
                                             </button>
-                                            <button type="button" onClick={handleCancelEdit} className="flex-1 bg-white border border-slate-300 text-slate-700 py-1.5 rounded-md text-sm font-medium hover:bg-slate-50">
+                                            <button type="button" onClick={handleCancelEdit} className="btn-cancel-sm">
                                                 Cancel
                                             </button>
                                         </div>
@@ -291,108 +281,93 @@ const ProfilePage = () => {
                         </div>
 
                         {/* Quick Stats */}
-                        <div className="grid grid-cols-2 gap-4">
-                            <div className="bg-white p-5 rounded-xl shadow-sm border border-slate-200">
-                                <div className="text-slate-500 text-xs font-semibold uppercase tracking-wider mb-1">Portfolios</div>
-                                <div className="text-2xl font-bold text-slate-900">{stats.loading ? '-' : stats.totalPortfolios}</div>
+                        <div className="stats-grid">
+                            <div className="stat-card">
+                                <div className="stat-label">Portfolios</div>
+                                <div className="stat-value text-slate">{stats.loading ? '-' : stats.totalPortfolios}</div>
                             </div>
-                            <div className="bg-white p-5 rounded-xl shadow-sm border border-slate-200">
-                                <div className="text-slate-500 text-xs font-semibold uppercase tracking-wider mb-1">Analysis Score</div>
-                                <div className="text-2xl font-bold text-indigo-600">{analysisResult ? `${analysisResult.matchScore}%` : '-'}</div>
+                            <div className="stat-card">
+                                <div className="stat-label">Match Score</div>
+                                <div className="stat-value text-indigo">{analysisResult ? `${analysisResult.matchScore}%` : '-'}</div>
                             </div>
                         </div>
 
                         {/* Navigation / Actions */}
-                        <div className="bg-white rounded-xl shadow-sm border border-slate-200 p-4 space-y-2">
+                        <div className="nav-card">
                             <button
                                 onClick={() => setActiveTab('overview')}
-                                className={`w-full flex items-center justify-between px-4 py-3 rounded-lg text-sm font-medium transition-colors ${activeTab === 'overview' ? 'bg-indigo-50 text-indigo-700' : 'text-slate-600 hover:bg-slate-50'}`}
+                                className={`nav-btn ${activeTab === 'overview' ? 'active' : ''}`}
                             >
-                                <span className="flex items-center"><User className="w-4 h-4 mr-3" /> Overview</span>
-                                <ChevronRight className="w-4 h-4 opacity-50" />
+                                <span className="nav-label"><User size={16} /> Overview</span>
+                                <ChevronRight size={16} className="opacity-50" />
                             </button>
                             <button
                                 onClick={() => setActiveTab('resume')}
-                                className={`w-full flex items-center justify-between px-4 py-3 rounded-lg text-sm font-medium transition-colors ${activeTab === 'resume' ? 'bg-indigo-50 text-indigo-700' : 'text-slate-600 hover:bg-slate-50'}`}
+                                className={`nav-btn ${activeTab === 'resume' ? 'active' : ''}`}
                             >
-                                <span className="flex items-center"><FileText className="w-4 h-4 mr-3" /> Resume Data</span>
-                                <ChevronRight className="w-4 h-4 opacity-50" />
+                                <span className="nav-label"><FileText size={16} /> Resume Data</span>
+                                <ChevronRight size={16} className="opacity-50" />
                             </button>
                             <button
                                 onClick={() => setActiveTab('analysis')}
-                                className={`w-full flex items-center justify-between px-4 py-3 rounded-lg text-sm font-medium transition-colors ${activeTab === 'analysis' ? 'bg-indigo-50 text-indigo-700' : 'text-slate-600 hover:bg-slate-50'}`}
+                                className={`nav-btn ${activeTab === 'analysis' ? 'active' : ''}`}
                             >
-                                <span className="flex items-center"><TrendingUp className="w-4 h-4 mr-3" /> AI Analysis</span>
-                                <ChevronRight className="w-4 h-4 opacity-50" />
+                                <span className="nav-label"><TrendingUp size={16} /> AI Analysis</span>
+                                <ChevronRight size={16} className="opacity-50" />
                             </button>
                         </div>
                     </div>
 
                     {/* RIGHT COLUMN: Main Content */}
-                    <div className="lg:col-span-8 space-y-6">
+                    <div className="profile-main">
 
                         {/* Status Messages */}
                         {(message.text || resumeMessage.text) && (
-                            <div className={`p-4 rounded-lg flex items-center gap-3 ${(message.type === 'error' || resumeMessage.type === 'error') ? 'bg-red-50 text-red-700 border border-red-200' : 'bg-green-50 text-green-700 border border-green-200'
+                            <div className={`alert-box ${(message.type === 'error' || resumeMessage.type === 'error') ? 'alert-error' : 'alert-success'
                                 }`}>
-                                {(message.type === 'error' || resumeMessage.type === 'error') ? <AlertCircle className="w-5 h-5 flex-shrink-0" /> : <CheckCircle className="w-5 h-5 flex-shrink-0" />}
-                                <p className="text-sm font-medium">{message.text || resumeMessage.text}</p>
+                                {(message.type === 'error' || resumeMessage.type === 'error') ? <AlertCircle size={20} /> : <CheckCircle size={20} />}
+                                <span>{message.text || resumeMessage.text}</span>
                             </div>
                         )}
 
-                        {/* Resume Upload Box (Always visible at top of right col) */}
-                        <div className="bg-gradient-to-r from-indigo-600 to-indigo-800 rounded-xl p-6 text-white shadow-md relative overflow-hidden">
-                            <div className="relative z-10 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
-                                <div>
-                                    <h3 className="text-lg font-bold">Update Resume</h3>
-                                    <p className="text-indigo-100 text-sm mt-1 max-w-md">
-                                        Upload your latest PDF resume to verify skills and get personalized job analysis scores.
-                                    </p>
-                                </div>
-                                <label className="inline-flex items-center px-4 py-2 border border-transparent shadow-sm text-sm font-medium rounded-lg text-indigo-600 bg-white hover:bg-indigo-50 cursor-pointer transition-all">
-                                    {resumeLoading ? (
-                                        <>
-                                            <div className="w-4 h-4 border-2 border-indigo-600 border-t-transparent rounded-full animate-spin mr-2"></div>
-                                            Parsing...
-                                        </>
-                                    ) : (
-                                        <>
-                                            <Upload className="w-4 h-4 mr-2" />
-                                            Upload PDF
-                                        </>
-                                    )}
-                                    <input type="file" accept=".pdf" onChange={handleResumeUpload} className="hidden" disabled={resumeLoading} />
-                                </label>
+                        {/* Resume Upload Box */}
+                        <div className="upload-card">
+                            <div className="upload-info">
+                                <h3>Update Resume</h3>
+                                <p>Upload your latest PDF resume to verify skills and get personalized job analysis scores.</p>
                             </div>
-                            <div className="absolute right-0 bottom-0 opacity-10 transform translate-x-8 translate-y-8">
-                                <FileText className="w-32 h-32" />
-                            </div>
+                            <label className="upload-btn-wrapper">
+                                <button className="btn-upload" disabled={resumeLoading}>
+                                    {resumeLoading ? 'Parsing...' : <><Upload size={16} style={{ marginRight: '8px' }} /> Upload PDF</>}
+                                </button>
+                                <input type="file" accept=".pdf" onChange={handleResumeUpload} className="hidden-input" disabled={resumeLoading} />
+                            </label>
                         </div>
 
                         {/* TAB CONTENT: Overview */}
                         {activeTab === 'overview' && (
-                            <div className="bg-white rounded-xl shadow-sm border border-slate-200 p-6 text-center py-12">
-                                <div className="max-w-md mx-auto">
-                                    <Briefcase className="w-12 h-12 text-indigo-200 mx-auto mb-4" />
-                                    <h3 className="text-lg font-bold text-slate-900 mb-2">My Career Dashboard</h3>
-                                    <p className="text-slate-500 mb-8">Access your resume data, improve your profile strength, and check your job match score.</p>
+                            <div className="tab-content-card empty-dashboard">
+                                <div className="dashboard-content">
+                                    <Briefcase className="dashboard-icon-large" />
+                                    <h3 className="dashboard-title">My Career Dashboard</h3>
+                                    <p className="dashboard-desc">Access your resume data, improve your profile strength, and check your job match score.</p>
 
-                                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                                        <button onClick={() => setActiveTab('resume')} className="p-4 border border-slate-200 rounded-xl hover:bg-slate-50 hover:border-indigo-200 transition-all text-left group">
-                                            <div className="flex items-center justify-between mb-2">
-                                                <FileText className="w-5 h-5 text-indigo-500 group-hover:scale-110 transition-transform" />
-                                                <ChevronRight className="w-4 h-4 text-slate-400" />
+                                    <div className="dashboard-actions">
+                                        <button onClick={() => setActiveTab('resume')} className="action-card-btn">
+                                            <div className="btn-header">
+                                                <FileText size={20} className="text-indigo" />
+                                                <ChevronRight size={16} color="#94a3b8" />
                                             </div>
-                                            <div className="font-semibold text-slate-900">Review Resume</div>
-                                            <div className="text-xs text-slate-500 mt-1">Check extracted skills & bio</div>
+                                            <div className="action-title">Review Resume</div>
+                                            <div className="action-desc">Check extracted skills & bio</div>
                                         </button>
-                                        <button onClick={() => setActiveTab('analysis')} className="p-4 border border-slate-200 rounded-xl hover:bg-slate-50 hover:border-indigo-200 transition-all text-left group">
-                                            <div className="flex items-center justify-between mb-2">
-                                                <TrendingUp className="w-5 h-5 text-green-500 group-hover:scale-110 transition-transform" />
-                                                <ChevronRight className="w-4 h-4 text-slate-400" />
+                                        <button onClick={() => setActiveTab('analysis')} className="action-card-btn">
+                                            <div className="btn-header">
+                                                <TrendingUp size={20} className="text-indigo" />
+                                                <ChevronRight size={16} color="#94a3b8" />
                                             </div>
-                                            <div className="font-semibold text-slate-900">AI Analysis</div>
-                                            <div className="text-xs text-slate-500 mt-1">Get job match scores</div>
+                                            <div className="action-title">AI Analysis</div>
+                                            <div className="action-desc">Get job match scores</div>
                                         </button>
                                     </div>
                                 </div>
@@ -401,62 +376,52 @@ const ProfilePage = () => {
 
                         {/* TAB CONTENT: Resume Data */}
                         {activeTab === 'resume' && (
-                            <div className="bg-white rounded-xl shadow-sm border border-slate-200 p-6 animate-fade-in">
-                                <h3 className="text-lg font-bold text-slate-900 mb-6 flex items-center">
-                                    <Briefcase className="w-5 h-5 mr-2 text-indigo-600" />
-                                    Resume Details
-                                </h3>
+                            <div className="tab-content-card">
+                                <div className="section-heading-row">
+                                    <Briefcase size={20} className="text-indigo" />
+                                    <span>Resume Details</span>
+                                </div>
 
-                                <div className="space-y-8">
-                                    {/* Bio */}
-                                    <div>
-                                        <h4 className="text-xs font-bold text-slate-400 uppercase tracking-wider mb-3">Professional Summary</h4>
+                                <div className="resume-data-content">
+                                    <div className="data-section">
+                                        <div className="data-label">Professional Summary</div>
                                         {user.bio ? (
-                                            <div className="bg-slate-50 p-4 rounded-lg border border-slate-100 text-slate-700 text-sm leading-relaxed">
-                                                {user.bio}
-                                            </div>
+                                            <div className="data-box">{user.bio}</div>
                                         ) : (
-                                            <div className="text-slate-400 italic text-sm">No summary available.</div>
+                                            <div className="no-data">No summary available.</div>
                                         )}
                                     </div>
 
-                                    {/* Skills */}
-                                    <div>
-                                        <h4 className="text-xs font-bold text-slate-400 uppercase tracking-wider mb-3">Skills</h4>
+                                    <div className="data-section">
+                                        <div className="data-label">Skills</div>
                                         {user.skills ? (
-                                            <div className="flex flex-wrap gap-2">
+                                            <div className="skills-container">
                                                 {user.skills.split(/,/).map((skill, i) => (
-                                                    <span key={i} className="px-3 py-1 bg-indigo-50 text-indigo-700 border border-indigo-100 rounded-full text-xs font-semibold">
+                                                    <span key={i} className="skill-pill">
                                                         {skill.trim()}
                                                     </span>
                                                 ))}
                                             </div>
                                         ) : (
-                                            <div className="text-slate-400 italic text-sm">No skills found.</div>
+                                            <div className="no-data">No skills found.</div>
                                         )}
                                     </div>
 
-                                    {/* Experience */}
-                                    <div>
-                                        <h4 className="text-xs font-bold text-slate-400 uppercase tracking-wider mb-3">Experience</h4>
+                                    <div className="data-section">
+                                        <div className="data-label">Experience</div>
                                         {user.experience ? (
-                                            <div className="bg-white border border-slate-100 rounded-lg p-4 text-sm text-slate-600 whitespace-pre-line">
-                                                {user.experience}
-                                            </div>
+                                            <div className="data-box">{user.experience}</div>
                                         ) : (
-                                            <div className="text-slate-400 italic text-sm">No experience listed.</div>
+                                            <div className="no-data">No experience listed.</div>
                                         )}
                                     </div>
 
-                                    {/* Projects */}
-                                    <div>
-                                        <h4 className="text-xs font-bold text-slate-400 uppercase tracking-wider mb-3">Projects</h4>
+                                    <div className="data-section">
+                                        <div className="data-label">Projects</div>
                                         {user.projects ? (
-                                            <div className="bg-white border border-slate-100 rounded-lg p-4 text-sm text-slate-600 whitespace-pre-line">
-                                                {user.projects}
-                                            </div>
+                                            <div className="data-box">{user.projects}</div>
                                         ) : (
-                                            <div className="text-slate-400 italic text-sm">No projects listed.</div>
+                                            <div className="no-data">No projects listed.</div>
                                         )}
                                     </div>
                                 </div>
@@ -465,40 +430,32 @@ const ProfilePage = () => {
 
                         {/* TAB CONTENT: Analysis */}
                         {activeTab === 'analysis' && (
-                            <div className="space-y-6 animate-fade-in">
+                            <div className="analysis-wrapper">
                                 {/* Input Card */}
-                                <div className="bg-white rounded-xl shadow-sm border border-slate-200 p-6">
-                                    <h3 className="text-lg font-bold text-slate-900 mb-4 flex items-center">
-                                        <TrendingUp className="w-5 h-5 mr-2 text-indigo-600" />
+                                <div className="analysis-input-card">
+                                    <h3 className="section-heading-row">
+                                        <TrendingUp size={20} className="text-indigo" />
                                         Job Match Analysis
                                     </h3>
 
-                                    <div className="flex flex-col sm:flex-row gap-3">
-                                        <div className="flex-1">
-                                            <label className="sr-only">Target Role</label>
-                                            <input
-                                                type="text"
-                                                value={targetRole}
-                                                onChange={(e) => setTargetRole(e.target.value)}
-                                                placeholder="Enter target job title (e.g. Frontend Developer)"
-                                                className="block w-full rounded-lg border-slate-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 px-4 py-2.5 border text-sm"
-                                            />
-                                        </div>
+                                    <div className="input-group-row">
+                                        <input
+                                            type="text"
+                                            value={targetRole}
+                                            onChange={(e) => setTargetRole(e.target.value)}
+                                            placeholder="Enter target job title (e.g. Frontend Developer)"
+                                            className="role-input"
+                                        />
                                         <button
                                             onClick={handleAnalyze}
                                             disabled={analyzing}
-                                            className="inline-flex justify-center items-center px-6 py-2.5 border border-transparent rounded-lg shadow-sm text-sm font-medium text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 disabled:opacity-70 disabled:cursor-not-allowed transition-all"
+                                            className="btn-analyze"
                                         >
-                                            {analyzing ? (
-                                                <>
-                                                    <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin mr-2"></div>
-                                                    Analyzing...
-                                                </>
-                                            ) : 'Analyze Match'}
+                                            {analyzing ? 'Analyzing...' : 'Analyze Match'}
                                         </button>
                                     </div>
                                     {analysisMessage.text && (
-                                        <p className={`mt-2 text-sm ${analysisMessage.type === 'error' ? 'text-red-500' : 'text-slate-500'}`}>
+                                        <p style={{ marginTop: '0.75rem', fontSize: '0.875rem', color: analysisMessage.type === 'error' ? '#ef4444' : '#64748b' }}>
                                             {analysisMessage.text}
                                         </p>
                                     )}
@@ -506,43 +463,43 @@ const ProfilePage = () => {
 
                                 {/* Results Card */}
                                 {analysisResult && (
-                                    <div className="bg-white rounded-xl shadow-sm border border-slate-200 overflow-hidden">
-                                        <div className="border-b border-slate-100 p-6 bg-slate-50 flex flex-wrap justify-between items-center gap-4">
+                                    <div className="analysis-result-card">
+                                        <div className="result-header">
                                             <div>
-                                                <div className="text-xs font-bold text-slate-400 uppercase tracking-wide">Overall Match Score</div>
-                                                <div className="flex items-baseline gap-2">
-                                                    <span className={`text-4xl font-extrabold ${analysisResult.matchScore >= 80 ? 'text-green-600' : analysisResult.matchScore >= 50 ? 'text-yellow-600' : 'text-red-600'
+                                                <div className="data-label">Overall Match Score</div>
+                                                <div className="score-display">
+                                                    <span className={`score-val ${analysisResult.matchScore >= 80 ? 'score-high' : analysisResult.matchScore >= 50 ? 'score-med' : 'score-low'
                                                         }`}>
                                                         {analysisResult.matchScore}
                                                     </span>
-                                                    <span className="text-slate-400 text-lg">/ 100</span>
+                                                    <span className="score-max">/ 100</span>
                                                 </div>
                                             </div>
                                             {analysisResult.id && (
-                                                <button onClick={downloadReport} className="inline-flex items-center px-3 py-1.5 border border-slate-300 shadow-sm text-xs font-medium rounded-md text-slate-700 bg-white hover:bg-slate-50">
-                                                    <Download className="w-3.5 h-3.5 mr-1.5" />
+                                                <button onClick={downloadReport} className="btn-download">
+                                                    <Download size={14} />
                                                     Download Report
                                                 </button>
                                             )}
                                         </div>
 
-                                        <div className="p-6 space-y-8">
+                                        <div className="result-body">
                                             {analysisResult.summary && (
-                                                <div className="prose prose-sm max-w-none text-slate-600">
-                                                    <p>{analysisResult.summary}</p>
+                                                <div className="summary-text">
+                                                    {analysisResult.summary}
                                                 </div>
                                             )}
 
-                                            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                                            <div className="insights-grid">
                                                 {/* Strengths */}
-                                                <div>
-                                                    <h4 className="flex items-center text-sm font-bold text-green-700 mb-3">
-                                                        <CheckCircle className="w-4 h-4 mr-2" /> Key Strengths
+                                                <div className="insight-col">
+                                                    <h4 className="text-success">
+                                                        <CheckCircle size={16} /> Key Strengths
                                                     </h4>
-                                                    <ul className="space-y-2">
+                                                    <ul className="insight-list">
                                                         {analysisResult.strengths?.map((item, i) => (
-                                                            <li key={i} className="flex items-start text-sm text-slate-600">
-                                                                <span className="w-1.5 h-1.5 bg-green-400 rounded-full mt-1.5 mr-2 flex-shrink-0"></span>
+                                                            <li key={i} className="insight-item">
+                                                                <div className="bullet bullet-success"></div>
                                                                 {item}
                                                             </li>
                                                         ))}
@@ -550,14 +507,14 @@ const ProfilePage = () => {
                                                 </div>
 
                                                 {/* Weaknesses */}
-                                                <div>
-                                                    <h4 className="flex items-center text-sm font-bold text-red-700 mb-3">
-                                                        <AlertCircle className="w-4 h-4 mr-2" /> Areas for Improvement
+                                                <div className="insight-col">
+                                                    <h4 className="text-danger">
+                                                        <AlertCircle size={16} /> Areas for Improvement
                                                     </h4>
-                                                    <ul className="space-y-2">
+                                                    <ul className="insight-list">
                                                         {analysisResult.weaknesses?.map((item, i) => (
-                                                            <li key={i} className="flex items-start text-sm text-slate-600">
-                                                                <span className="w-1.5 h-1.5 bg-red-400 rounded-full mt-1.5 mr-2 flex-shrink-0"></span>
+                                                            <li key={i} className="insight-item">
+                                                                <div className="bullet bullet-danger"></div>
                                                                 {item}
                                                             </li>
                                                         ))}
@@ -567,18 +524,18 @@ const ProfilePage = () => {
 
                                             {/* Tips */}
                                             {analysisResult.improvementTips?.length > 0 && (
-                                                <div className="bg-indigo-50 rounded-lg p-5 border border-indigo-100">
-                                                    <h4 className="flex items-center text-sm font-bold text-indigo-800 mb-3">
-                                                        <TrendingUp className="w-4 h-4 mr-2" /> Improvement Tips
+                                                <div className="tips-box">
+                                                    <h4 className="tips-title">
+                                                        <TrendingUp size={16} /> Improvement Tips
                                                     </h4>
-                                                    <ul className="space-y-2">
+                                                    <div>
                                                         {analysisResult.improvementTips.map((tip, i) => (
-                                                            <li key={i} className="flex items-start text-sm text-indigo-900">
-                                                                <span className="font-bold mr-2">{i + 1}.</span>
-                                                                {tip}
-                                                            </li>
+                                                            <div key={i} className="tip-item">
+                                                                <span className="tip-num">{i + 1}.</span>
+                                                                <span>{tip}</span>
+                                                            </div>
                                                         ))}
-                                                    </ul>
+                                                    </div>
                                                 </div>
                                             )}
                                         </div>
