@@ -230,13 +230,16 @@ public class AiGenerationService {
     public PortfolioRequestDTO parseResume(String resumeText) {
         String prompt = "Extract the following details from the resume text below and return them in strictly valid JSON format with keys: 'name', 'email', 'phone', 'linkedin', 'github', 'role', 'skills', 'experience', 'projects'.\n"
                 +
-                "IMPORTANT: \n" +
-                "- 'skills' must be a SINGLE STRING with comma-separated values.\n" +
-                "- 'experience' must be a SINGLE STRING summarizing the experience.\n" +
-                "- 'projects' must be a SINGLE STRING summarizing the projects.\n" +
-                "- 'name', 'email', 'phone', 'linkedin', 'github' should be extracted if available, otherwise return empty strings.\n"
+                "IMPORTANT FORMATTING RULES: \n" +
+                "- 'skills': Must be a strictly COMMA-SEPARATED string (e.g., 'Java, Python, React, SQL'). Do NOT group them or use other delimiters.\n"
                 +
-                "- Do NOT return JSON arrays or objects for any fields.\n" +
+                "- 'experience': Must be a formatted string using BULLET POINTS (•) for each role. Include Company, Role, and Dates if available. Use newlines to separate bullets.\n"
+                +
+                "- 'projects': Must be a formatted string using BULLET POINTS (•) for each project. Include Project Name and a brief description. Use newlines to separate bullets.\n"
+                +
+                "- 'name', 'email', 'phone', 'linkedin', 'github': Extract if available, otherwise return empty strings.\n"
+                +
+                "- Do NOT return JSON arrays or objects for any fields. Return strings only.\n" +
                 "Resume Text:\n" +
                 resumeText + "\n" +
                 "\n" +
