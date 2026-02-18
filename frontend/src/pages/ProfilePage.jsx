@@ -140,23 +140,10 @@ const ProfilePage = () => {
         formData.append('file', file);
 
         try {
-            // New endpoint to upload and save to profile
-            // CORRECT: Do NOT set Content-Type manually. Let browser set it with boundary.
-            // BUT: We DO need to set the Authorization header explicitly if the interceptor isn't catching it.
-            const token = sessionStorage.getItem('token');
-            console.log("Uploading resume with token:", token ? "Present" : "Missing"); // Debug log
-
-            if (!token) {
-                setResumeMessage({ type: 'error', text: 'Authentication token missing. Please login again.' });
-                setResumeLoading(false);
-                return;
-            }
-
-            // CORRECT: Use direct axios call to avoid default Content-Type: application/json from api instance
-            const response = await axios.post('http://localhost:8081/api/resume/upload-to-profile', formData, {
+            // Use api instance to handle Base URL and Authorization header automatically
+            const response = await api.post('/resume/upload-to-profile', formData, {
                 headers: {
-                    'Authorization': `Bearer ${token}`
-                    // No Content-Type header here -> Browser sets it to multipart/form-data with boundary
+                    'Content-Type': 'multipart/form-data'
                 }
             });
 
@@ -433,9 +420,7 @@ const ProfilePage = () => {
                                                     <button
                                                         onClick={async () => {
                                                             try {
-                                                                const token = sessionStorage.getItem('token');
-                                                                const response = await axios.get(`http://localhost:8081/api/resume/analyze/${analysisResult.id}/download`, {
-                                                                    headers: { 'Authorization': `Bearer ${token}` },
+                                                                const response = await api.get(`/resume/analyze/${analysisResult.id}/download`, {
                                                                     responseType: 'blob'
                                                                 });
                                                                 const url = window.URL.createObjectURL(new Blob([response.data]));
