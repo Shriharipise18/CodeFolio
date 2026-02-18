@@ -17,8 +17,8 @@ const Layout = () => {
         <div className="app-layout" style={{ display: 'flex', flexDirection: 'column', minHeight: '100vh' }}>
             <header className="app-navbar">
                 <div className="app-navbar-container">
-                    <Link to="/" className="app-navbar-brand">
-                        <img src={Logo} alt="CodeFolio" style={{ height: '40px', width: 'auto' }} />
+                    <Link to="/" className="app-navbar-brand" style={{ display: 'flex', alignItems: 'center' }}>
+                        <img src={Logo} alt="CodeFolio" style={{ height: '50px', width: 'auto', display: 'block' }} />
                     </Link>
 
                     <nav className="app-navbar-menu">
