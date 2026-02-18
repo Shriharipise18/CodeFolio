@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { Outlet, Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
+import Logo from '../assets/logo.png';
 
 const Layout = () => {
     const { user, logout } = useAuth();
@@ -17,11 +18,7 @@ const Layout = () => {
             <header className="app-navbar">
                 <div className="app-navbar-container">
                     <Link to="/" className="app-navbar-brand">
-                        <div className="app-navbar-logo">P</div>
-                        {/* Always show title unless very small, managed by CSS if needed */}
-                        <span className="app-navbar-title">
-                            Portfolio<span style={{ color: 'var(--color-primary)' }}>AI</span>
-                        </span>
+                        <img src={Logo} alt="CodeFolio" style={{ height: '40px', width: 'auto' }} />
                     </Link>
 
                     <nav className="app-navbar-menu">
@@ -92,7 +89,7 @@ const Layout = () => {
                     <div className="footer-grid">
                         <div className="footer-brand">
                             <Link to="/" className="footer-logo">
-                                Portfolio<span style={{ color: 'var(--color-primary)' }}>AI</span>
+                                <img src={Logo} alt="CodeFolio" style={{ height: '32px', width: 'auto' }} />
                             </Link>
                             <p className="footer-desc">
                                 The smartest way for developers to build, host, and share professional portfolios.
@@ -133,7 +130,7 @@ const Layout = () => {
                     </div>
 
                     <div className="footer-bottom">
-                        <div>&copy; {new Date().getFullYear()} PortfolioAI. All rights reserved.</div>
+                        <div>&copy; {new Date().getFullYear()} CodeFolio. All rights reserved.</div>
                         <div className="flex gap-6">
                             <a href="#" className="hover:text-blue-500 transition-colors">Twitter</a>
                             <a href="#" className="hover:text-blue-500 transition-colors">GitHub</a>

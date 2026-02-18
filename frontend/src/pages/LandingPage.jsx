@@ -46,7 +46,7 @@ const LandingPage = () => {
                                     <span className="t-btn yellow"></span>
                                     <span className="t-btn green"></span>
                                 </div>
-                                <div className="terminal-title">portfolio-ai-cli — v2.0.4</div>
+                                <div className="terminal-title">codefolio-cli — v2.0.4</div>
                             </div>
                             <div className="terminal-body">
                                 <div className="cmd-line">
@@ -58,7 +58,7 @@ const LandingPage = () => {
                                     <div className="log-line">ℹ  Generating custom bio... <span className="text-green">Done</span></div>
                                     <div className="log-line">ℹ  Building React components... <span className="text-green">Done</span></div>
                                     <div className="log-line">✔  <span className="text-green">Success!</span> Your portfolio is live:</div>
-                                    <div className="log-line link">https://portfolio.ai/u/alex-dev</div>
+                                    <div className="log-line link">https://codefolio.dev/u/alex-dev</div>
                                 </div>
                             </div>
                         </div>
