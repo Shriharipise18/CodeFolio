@@ -47,6 +47,17 @@ const ProfilePage = () => {
                 console.error("Failed to fetch stats", error);
                 setStats({ totalPortfolios: 0, loading: false });
             }
+
+            // Fetch last analysis for persistent health score
+            try {
+                const analysisRes = await api.get('/resume/last-analysis');
+                if (analysisRes.data) {
+                    setAnalysisResult(analysisRes.data);
+                }
+            } catch (error) {
+                console.error("Failed to fetch last analysis", error);
+                // Do nothing, just leave it null (empty state)
+            }
         };
         fetchStats();
     }, []);

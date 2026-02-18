@@ -137,6 +137,34 @@ public class ResumeController {
         }
     }
 
+    @org.springframework.web.bind.annotation.GetMapping("/last-analysis")
+    @Operation(summary = "Get Last Analysis", description = "Retrieve the most recent analysis result for the user")
+    public ResponseEntity<AnalysisResponseDTO> getLastAnalysis(java.security.Principal principal) {
+        try {
+            String email = principal.getName();
+            org.example.portfolioai.entity.UserEntity user = authService.findByEmail(email)
+                    .orElseThrow(() -> new RuntimeException("User not found"));
+
+            java.util.List<org.example.portfolioai.entity.AnalysisEntity> history = analysisRepository
+                    .findByUserIdOrderByCreatedAtDesc(user.getId());
+
+            if (history.isEmpty()) {
+                return ResponseEntity.noContent().build();
+            }
+
+            org.example.portfolioai.entity.AnalysisEntity latest = history.get(0);
+            AnalysisResponseDTO analysis = objectMapper.readValue(latest.getRawJsonContent(),
+                    AnalysisResponseDTO.class);
+            analysis.setId(latest.getId());
+
+            return ResponseEntity.ok(analysis);
+
+        } catch (Exception e) {
+            e.printStackTrace();
+            return ResponseEntity.internalServerError().build();
+        }
+    }
+
     @org.springframework.web.bind.annotation.GetMapping("/analyze/{id}/download")
     public ResponseEntity<byte[]> downloadAnalysis(@org.springframework.web.bind.annotation.PathVariable Long id) {
         try {
