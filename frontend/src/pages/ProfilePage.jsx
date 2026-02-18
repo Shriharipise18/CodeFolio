@@ -1,19 +1,28 @@
 import React, { useEffect, useState } from 'react';
-import axios from 'axios';
 import { useAuth } from '../context/AuthContext';
 import api from '../services/api';
 import { useNavigate } from 'react-router-dom';
+import {
+    User, Mail, Phone, MapPin, Edit2, Upload, FileText,
+    CheckCircle, AlertCircle, TrendingUp, Download, Briefcase,
+    Code, Layers, Award, LogOut, ChevronRight
+} from 'lucide-react';
 
 const ProfilePage = () => {
     const { user, logout, updateUser } = useAuth();
     const navigate = useNavigate();
     const [stats, setStats] = useState({ totalPortfolios: 0, loading: true });
+    const [activeTab, setActiveTab] = useState('overview'); // overview, resume, analysis
 
     // Edit Profile State
     const [isEditing, setIsEditing] = useState(false);
     const [formData, setFormData] = useState({
         fullName: '',
-        password: ''
+        password: '',
+        bio: '',
+        skills: '',
+        experience: '',
+        projects: ''
     });
     const [message, setMessage] = useState({ type: '', text: '' });
     const [loadingUpdate, setLoadingUpdate] = useState(false);
@@ -27,43 +36,6 @@ const ProfilePage = () => {
     const [analysisResult, setAnalysisResult] = useState(null);
     const [analyzing, setAnalyzing] = useState(false);
     const [analysisMessage, setAnalysisMessage] = useState({ type: '', text: '' });
-
-    const handleAnalyze = async () => {
-        if (!targetRole.trim()) {
-            setAnalysisMessage({ type: 'error', text: 'Please enter a target role.' });
-            return;
-        }
-        if (!user.skills && !user.experience && !user.projects) {
-            setAnalysisMessage({ type: 'error', text: 'Please upload a resume or fill out your profile first.' });
-            return;
-        }
-
-        setAnalyzing(true);
-        setAnalysisMessage({ type: '', text: '' });
-        setAnalysisResult(null);
-
-        try {
-            const payload = {
-                role: targetRole,
-                skills: user.skills || '',
-                experience: user.experience || '',
-                projects: user.projects || '',
-                // include other fields if needed
-            };
-
-            const response = await api.post('/resume/analyze', payload);
-            console.log("Analysis Result:", response.data); // Debug log
-            setAnalysisResult(response.data);
-        } catch (error) {
-            console.error("Analysis failed", error);
-            setAnalysisMessage({
-                type: 'error',
-                text: error.response?.data?.error || 'Failed to analyze profile'
-            });
-        } finally {
-            setAnalyzing(false);
-        }
-    };
 
     useEffect(() => {
         const fetchStats = async () => {
@@ -140,17 +112,9 @@ const ProfilePage = () => {
         formData.append('file', file);
 
         try {
-            // Use api instance to handle Base URL and Authorization header automatically
             const response = await api.post('/resume/upload-to-profile', formData, {
-                headers: {
-                    'Content-Type': 'multipart/form-data'
-                }
+                headers: { 'Content-Type': 'multipart/form-data' }
             });
-
-            // The response contains the parsed data. 
-            // We also know the backend has updated the user entity.
-            // So we can merge this data into our local user context.
-            // Note: response.data is PortfolioRequestDTO, which has generatedBio, skills, etc.
 
             updateUser({
                 bio: response.data.generatedBio,
@@ -159,7 +123,8 @@ const ProfilePage = () => {
                 projects: response.data.projects
             });
 
-            setResumeMessage({ type: 'success', text: 'Resume parsed and saved to profile!' });
+            setResumeMessage({ type: 'success', text: 'Resume parsed securely!' });
+            setActiveTab('resume'); // Switch to resume tab to show data
         } catch (error) {
             console.error("Resume upload failed", error);
             setResumeMessage({
@@ -171,399 +136,459 @@ const ProfilePage = () => {
         }
     };
 
-    if (!user) return <div>Loading...</div>;
+    const handleAnalyze = async () => {
+        if (!targetRole.trim()) {
+            setAnalysisMessage({ type: 'error', text: 'Please enter a target role.' });
+            return;
+        }
+        if (!user.skills && !user.experience) {
+            setAnalysisMessage({ type: 'error', text: 'Please upload a resume first.' });
+            return;
+        }
+
+        setAnalyzing(true);
+        setAnalysisMessage({ type: '', text: '' });
+        setAnalysisResult(null);
+
+        try {
+            const payload = {
+                role: targetRole,
+                skills: user.skills || '',
+                experience: user.experience || '',
+                projects: user.projects || ''
+            };
+
+            const response = await api.post('/resume/analyze', payload);
+            setAnalysisResult(response.data);
+        } catch (error) {
+            console.error("Analysis failed", error);
+            setAnalysisMessage({
+                type: 'error',
+                text: error.response?.data?.error || 'Failed to analyze profile'
+            });
+        } finally {
+            setAnalyzing(false);
+        }
+    };
+
+    const downloadReport = async () => {
+        if (!analysisResult?.id) return;
+        try {
+            const response = await api.get(`/resume/analyze/${analysisResult.id}/download`, {
+                responseType: 'blob'
+            });
+            const url = window.URL.createObjectURL(new Blob([response.data]));
+            const link = document.createElement('a');
+            link.href = url;
+            link.setAttribute('download', `Analysis_Report_${new Date().toISOString().slice(0, 10)}.docx`);
+            document.body.appendChild(link);
+            link.click();
+            link.remove();
+        } catch (error) {
+            console.error("Download failed", error);
+        }
+    };
+
+    if (!user) return (
+        <div className="flex justify-center items-center h-screen bg-slate-50">
+            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-indigo-600"></div>
+        </div>
+    );
 
     return (
-        <div className="container" style={{ padding: '40px 20px', maxWidth: '800px' }}>
-            <h1 className="text-3xl font-bold text-slate-800 mb-8">My Profile</h1>
+        <div className="min-h-screen bg-slate-50 py-12 px-4 sm:px-6 lg:px-8 font-sans">
+            <div className="max-w-7xl mx-auto">
 
-            {message.text && (
-                <div className={`p-4 mb-6 rounded-lg ${message.type === 'success' ? 'bg-green-100 text-green-700' : 'bg-red-100 text-red-700'}`}>
-                    {message.text}
+                {/* Header Section */}
+                <div className="mb-8 flex flex-col md:flex-row md:items-center justify-between gap-4">
+                    <div>
+                        <h1 className="text-3xl font-bold text-slate-900">
+                            Welcome back, {user.fullName?.split(' ')[0] || 'User'}! 👋
+                        </h1>
+                        <p className="text-slate-500 mt-1">Manage your profile, analyze your resume, and track your progress.</p>
+                    </div>
+                    <div className="flex items-center gap-3">
+                        <button
+                            onClick={handleLogout}
+                            className="inline-flex items-center px-4 py-2 border border-slate-300 rounded-lg text-sm font-medium text-slate-700 bg-white hover:bg-slate-50 transition-colors"
+                        >
+                            <LogOut className="w-4 h-4 mr-2" />
+                            Sign Out
+                        </button>
+                    </div>
                 </div>
-            )}
 
-            <div className="card p-8 mb-8">
-                {/* Profile Header */}
-                <div className="flex items-center gap-6 mb-8">
-                    <div className="w-24 h-24 rounded-full bg-indigo-100 flex items-center justify-center text-3xl font-bold text-indigo-600">
-                        {user.fullName ? user.fullName.charAt(0).toUpperCase() : 'U'}
+                <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
+
+                    {/* LEFT COLUMN: Profile Card & Navigation */}
+                    <div className="lg:col-span-4 space-y-6">
+
+                        {/* Profile Card */}
+                        <div className="bg-white rounded-2xl shadow-sm border border-slate-200 overflow-hidden">
+                            <div className="h-24 bg-gradient-to-r from-indigo-500 to-purple-600"></div>
+                            <div className="px-6 pb-6 mt-[-40px]">
+                                <div className="relative inline-block">
+                                    <div className="w-20 h-20 rounded-full bg-white p-1 shadow-md">
+                                        <div className="w-full h-full rounded-full bg-slate-100 flex items-center justify-center text-2xl font-bold text-indigo-600 uppercase">
+                                            {user.fullName ? user.fullName.charAt(0) : 'U'}
+                                        </div>
+                                    </div>
+                                    {!isEditing && (
+                                        <button
+                                            onClick={handleEditClick}
+                                            className="absolute bottom-0 right-0 p-1.5 bg-indigo-600 text-white rounded-full shadow-lg hover:bg-indigo-700 transition-colors"
+                                            title="Edit Profile"
+                                        >
+                                            <Edit2 className="w-3.5 h-3.5" />
+                                        </button>
+                                    )}
+                                </div>
+
+                                {!isEditing ? (
+                                    <div className="mt-3">
+                                        <h2 className="text-xl font-bold text-slate-900">{user.fullName || 'Guest User'}</h2>
+                                        <div className="flex items-center text-slate-500 text-sm mt-1">
+                                            <Mail className="w-3.5 h-3.5 mr-1.5" />
+                                            {user.email}
+                                        </div>
+                                        <div className="mt-4 flex items-center gap-2">
+                                            <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800">
+                                                <div className="w-1.5 h-1.5 rounded-full bg-green-500 mr-1.5"></div>
+                                                Active Account
+                                            </span>
+                                        </div>
+                                    </div>
+                                ) : (
+                                    <form onSubmit={handleSubmit} className="mt-4 space-y-3">
+                                        <input
+                                            type="text"
+                                            name="fullName"
+                                            value={formData.fullName}
+                                            onChange={handleChange}
+                                            className="block w-full rounded-md border-slate-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm px-3 py-2 border"
+                                            placeholder="Full Name"
+                                            required
+                                        />
+                                        <input
+                                            type="password"
+                                            name="password"
+                                            value={formData.password}
+                                            onChange={handleChange}
+                                            className="block w-full rounded-md border-slate-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm px-3 py-2 border"
+                                            placeholder="New Password (optional)"
+                                        />
+                                        <div className="flex gap-2 pt-2">
+                                            <button type="submit" disabled={loadingUpdate} className="flex-1 bg-indigo-600 text-white py-1.5 rounded-md text-sm font-medium hover:bg-indigo-700">
+                                                {loadingUpdate ? 'Saving...' : 'Save'}
+                                            </button>
+                                            <button type="button" onClick={handleCancelEdit} className="flex-1 bg-white border border-slate-300 text-slate-700 py-1.5 rounded-md text-sm font-medium hover:bg-slate-50">
+                                                Cancel
+                                            </button>
+                                        </div>
+                                    </form>
+                                )}
+                            </div>
+                        </div>
+
+                        {/* Quick Stats */}
+                        <div className="grid grid-cols-2 gap-4">
+                            <div className="bg-white p-5 rounded-xl shadow-sm border border-slate-200">
+                                <div className="text-slate-500 text-xs font-semibold uppercase tracking-wider mb-1">Portfolios</div>
+                                <div className="text-2xl font-bold text-slate-900">{stats.loading ? '-' : stats.totalPortfolios}</div>
+                            </div>
+                            <div className="bg-white p-5 rounded-xl shadow-sm border border-slate-200">
+                                <div className="text-slate-500 text-xs font-semibold uppercase tracking-wider mb-1">Analysis Score</div>
+                                <div className="text-2xl font-bold text-indigo-600">{analysisResult ? `${analysisResult.matchScore}%` : '-'}</div>
+                            </div>
+                        </div>
+
+                        {/* Navigation / Actions */}
+                        <div className="bg-white rounded-xl shadow-sm border border-slate-200 p-4 space-y-2">
+                            <button
+                                onClick={() => setActiveTab('overview')}
+                                className={`w-full flex items-center justify-between px-4 py-3 rounded-lg text-sm font-medium transition-colors ${activeTab === 'overview' ? 'bg-indigo-50 text-indigo-700' : 'text-slate-600 hover:bg-slate-50'}`}
+                            >
+                                <span className="flex items-center"><User className="w-4 h-4 mr-3" /> Overview</span>
+                                <ChevronRight className="w-4 h-4 opacity-50" />
+                            </button>
+                            <button
+                                onClick={() => setActiveTab('resume')}
+                                className={`w-full flex items-center justify-between px-4 py-3 rounded-lg text-sm font-medium transition-colors ${activeTab === 'resume' ? 'bg-indigo-50 text-indigo-700' : 'text-slate-600 hover:bg-slate-50'}`}
+                            >
+                                <span className="flex items-center"><FileText className="w-4 h-4 mr-3" /> Resume Data</span>
+                                <ChevronRight className="w-4 h-4 opacity-50" />
+                            </button>
+                            <button
+                                onClick={() => setActiveTab('analysis')}
+                                className={`w-full flex items-center justify-between px-4 py-3 rounded-lg text-sm font-medium transition-colors ${activeTab === 'analysis' ? 'bg-indigo-50 text-indigo-700' : 'text-slate-600 hover:bg-slate-50'}`}
+                            >
+                                <span className="flex items-center"><TrendingUp className="w-4 h-4 mr-3" /> AI Analysis</span>
+                                <ChevronRight className="w-4 h-4 opacity-50" />
+                            </button>
+                        </div>
                     </div>
 
-                    {!isEditing ? (
-                        <div className="flex-1">
-                            <div className="flex justify-between items-start">
+                    {/* RIGHT COLUMN: Main Content */}
+                    <div className="lg:col-span-8 space-y-6">
+
+                        {/* Status Messages */}
+                        {(message.text || resumeMessage.text) && (
+                            <div className={`p-4 rounded-lg flex items-center gap-3 ${(message.type === 'error' || resumeMessage.type === 'error') ? 'bg-red-50 text-red-700 border border-red-200' : 'bg-green-50 text-green-700 border border-green-200'
+                                }`}>
+                                {(message.type === 'error' || resumeMessage.type === 'error') ? <AlertCircle className="w-5 h-5 flex-shrink-0" /> : <CheckCircle className="w-5 h-5 flex-shrink-0" />}
+                                <p className="text-sm font-medium">{message.text || resumeMessage.text}</p>
+                            </div>
+                        )}
+
+                        {/* Resume Upload Box (Always visible at top of right col) */}
+                        <div className="bg-gradient-to-r from-indigo-600 to-indigo-800 rounded-xl p-6 text-white shadow-md relative overflow-hidden">
+                            <div className="relative z-10 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
                                 <div>
-                                    <h2 className="text-2xl font-bold text-slate-800">{user.fullName || 'User'}</h2>
-                                    <p className="text-slate-500">{user.email}</p>
+                                    <h3 className="text-lg font-bold">Update Resume</h3>
+                                    <p className="text-indigo-100 text-sm mt-1 max-w-md">
+                                        Upload your latest PDF resume to verify skills and get personalized job analysis scores.
+                                    </p>
                                 </div>
-                                <button
-                                    onClick={handleEditClick}
-                                    className="btn btn-sm btn-outline text-indigo-600 border-indigo-200 hover:bg-indigo-50"
-                                >
-                                    Edit Profile
-                                </button>
-                            </div>
-                        </div>
-                    ) : (
-                        <form onSubmit={handleSubmit} className="flex-1 space-y-4">
-                            <div>
-                                <label className="block text-sm font-medium text-slate-700 mb-1">Full Name</label>
-                                <input
-                                    type="text"
-                                    name="fullName"
-                                    value={formData.fullName}
-                                    onChange={handleChange}
-                                    className="input w-full"
-                                    placeholder="Enter your full name"
-                                    required
-                                />
-                            </div>
-                            <div>
-                                <label className="block text-sm font-medium text-slate-700 mb-1">New Password <span className="text-slate-400 font-normal">(leave blank to keep current)</span></label>
-                                <input
-                                    type="password"
-                                    name="password"
-                                    value={formData.password}
-                                    onChange={handleChange}
-                                    className="input w-full"
-                                    placeholder="New password"
-                                />
-                            </div>
-
-                            <div className="border-t border-slate-100 pt-4 mt-4">
-                                <h3 className="text-sm font-bold text-slate-500 uppercase tracking-wide mb-4">Resume Details</h3>
-
-                                <div className="space-y-4">
-                                    <div>
-                                        <label className="block text-sm font-medium text-slate-700 mb-1">Bio</label>
-                                        <textarea
-                                            name="bio"
-                                            value={formData.bio}
-                                            onChange={handleChange}
-                                            className="input w-full h-24"
-                                            placeholder="Professional summary..."
-                                        />
-                                    </div>
-                                    <div>
-                                        <label className="block text-sm font-medium text-slate-700 mb-1">Skills <span className="text-slate-400 font-normal">(comma separated)</span></label>
-                                        <textarea
-                                            name="skills"
-                                            value={formData.skills}
-                                            onChange={handleChange}
-                                            className="input w-full"
-                                            placeholder="Java, React, Spring Boot..."
-                                        />
-                                    </div>
-                                    <div>
-                                        <label className="block text-sm font-medium text-slate-700 mb-1">Experience</label>
-                                        <textarea
-                                            name="experience"
-                                            value={formData.experience}
-                                            onChange={handleChange}
-                                            className="input w-full h-32"
-                                            placeholder="Work experience details..."
-                                        />
-                                    </div>
-                                    <div>
-                                        <label className="block text-sm font-medium text-slate-700 mb-1">Projects</label>
-                                        <textarea
-                                            name="projects"
-                                            value={formData.projects}
-                                            onChange={handleChange}
-                                            className="input w-full h-32"
-                                            placeholder="Project details..."
-                                        />
-                                    </div>
-                                </div>
-                            </div>
-                            <div className="flex gap-3 pt-2">
-                                <button
-                                    type="submit"
-                                    className="btn btn-primary bg-indigo-600 text-white"
-                                    disabled={loadingUpdate}
-                                >
-                                    {loadingUpdate ? 'Saving...' : 'Save Changes'}
-                                </button>
-                                <button
-                                    type="button"
-                                    onClick={handleCancelEdit}
-                                    className="btn btn-ghost text-slate-600"
-                                    disabled={loadingUpdate}
-                                >
-                                    Cancel
-                                </button>
-                            </div>
-                        </form>
-                    )}
-                </div>
-
-                {!isEditing && (
-                    <>
-                        {/* Stats Section */}
-                        <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
-                            <div className="bg-slate-50 p-6 rounded-xl border border-slate-100">
-                                <h3 className="text-sm font-bold text-slate-500 uppercase tracking-wide mb-2">Total Portfolios</h3>
-                                <p className="text-4xl font-bold text-indigo-600">
-                                    {stats.loading ? '...' : stats.totalPortfolios}
-                                </p>
-                            </div>
-                            <div className="bg-slate-50 p-6 rounded-xl border border-slate-100">
-                                <h3 className="text-sm font-bold text-slate-500 uppercase tracking-wide mb-2">Account Status</h3>
-                                <p className="text-lg font-bold text-green-600 flex items-center gap-2">
-                                    <span className="w-2 h-2 rounded-full bg-green-500"></span>
-                                    Active
-                                </p>
-                            </div>
-                        </div>
-
-                        {/* Resume Section */}
-                        <div className="border-t border-slate-100 pt-8 mb-8">
-                            <div className="flex justify-between items-center mb-6">
-                                <h2 className="text-xl font-bold text-slate-800">Resume Data</h2>
-                                <label className="btn btn-sm btn-primary bg-indigo-600 text-white cursor-pointer">
-                                    {resumeLoading ? 'Uploading...' : 'Upload Resume'}
-                                    <input
-                                        type="file"
-                                        accept=".pdf"
-                                        onChange={handleResumeUpload}
-                                        className="hidden"
-                                        disabled={resumeLoading}
-                                    />
+                                <label className="inline-flex items-center px-4 py-2 border border-transparent shadow-sm text-sm font-medium rounded-lg text-indigo-600 bg-white hover:bg-indigo-50 cursor-pointer transition-all">
+                                    {resumeLoading ? (
+                                        <>
+                                            <div className="w-4 h-4 border-2 border-indigo-600 border-t-transparent rounded-full animate-spin mr-2"></div>
+                                            Parsing...
+                                        </>
+                                    ) : (
+                                        <>
+                                            <Upload className="w-4 h-4 mr-2" />
+                                            Upload PDF
+                                        </>
+                                    )}
+                                    <input type="file" accept=".pdf" onChange={handleResumeUpload} className="hidden" disabled={resumeLoading} />
                                 </label>
                             </div>
+                            <div className="absolute right-0 bottom-0 opacity-10 transform translate-x-8 translate-y-8">
+                                <FileText className="w-32 h-32" />
+                            </div>
+                        </div>
 
-                            {resumeMessage.text && (
-                                <div className={`p-4 mb-6 rounded-lg ${resumeMessage.type === 'success' ? 'bg-green-100 text-green-700' : 'bg-red-100 text-red-700'}`}>
-                                    {resumeMessage.text}
+                        {/* TAB CONTENT: Overview */}
+                        {activeTab === 'overview' && (
+                            <div className="bg-white rounded-xl shadow-sm border border-slate-200 p-6 text-center py-12">
+                                <div className="max-w-md mx-auto">
+                                    <Briefcase className="w-12 h-12 text-indigo-200 mx-auto mb-4" />
+                                    <h3 className="text-lg font-bold text-slate-900 mb-2">My Career Dashboard</h3>
+                                    <p className="text-slate-500 mb-8">Access your resume data, improve your profile strength, and check your job match score.</p>
+
+                                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                                        <button onClick={() => setActiveTab('resume')} className="p-4 border border-slate-200 rounded-xl hover:bg-slate-50 hover:border-indigo-200 transition-all text-left group">
+                                            <div className="flex items-center justify-between mb-2">
+                                                <FileText className="w-5 h-5 text-indigo-500 group-hover:scale-110 transition-transform" />
+                                                <ChevronRight className="w-4 h-4 text-slate-400" />
+                                            </div>
+                                            <div className="font-semibold text-slate-900">Review Resume</div>
+                                            <div className="text-xs text-slate-500 mt-1">Check extracted skills & bio</div>
+                                        </button>
+                                        <button onClick={() => setActiveTab('analysis')} className="p-4 border border-slate-200 rounded-xl hover:bg-slate-50 hover:border-indigo-200 transition-all text-left group">
+                                            <div className="flex items-center justify-between mb-2">
+                                                <TrendingUp className="w-5 h-5 text-green-500 group-hover:scale-110 transition-transform" />
+                                                <ChevronRight className="w-4 h-4 text-slate-400" />
+                                            </div>
+                                            <div className="font-semibold text-slate-900">AI Analysis</div>
+                                            <div className="text-xs text-slate-500 mt-1">Get job match scores</div>
+                                        </button>
+                                    </div>
                                 </div>
-                            )}
+                            </div>
+                        )}
 
-                            {user.bio || user.skills ? (
-                                <div className="space-y-6">
-                                    {user.bio && (
-                                        <div>
-                                            <h3 className="text-sm font-bold text-slate-500 uppercase tracking-wide mb-2">Bio</h3>
-                                            <p className="text-slate-700 bg-slate-50 p-4 rounded-lg border border-slate-100 text-sm leading-relaxed">{user.bio}</p>
-                                        </div>
-                                    )}
-                                    {user.skills && (
-                                        <div>
-                                            <h3 className="text-sm font-bold text-slate-500 uppercase tracking-wide mb-2">Skills</h3>
+                        {/* TAB CONTENT: Resume Data */}
+                        {activeTab === 'resume' && (
+                            <div className="bg-white rounded-xl shadow-sm border border-slate-200 p-6 animate-fade-in">
+                                <h3 className="text-lg font-bold text-slate-900 mb-6 flex items-center">
+                                    <Briefcase className="w-5 h-5 mr-2 text-indigo-600" />
+                                    Resume Details
+                                </h3>
+
+                                <div className="space-y-8">
+                                    {/* Bio */}
+                                    <div>
+                                        <h4 className="text-xs font-bold text-slate-400 uppercase tracking-wider mb-3">Professional Summary</h4>
+                                        {user.bio ? (
+                                            <div className="bg-slate-50 p-4 rounded-lg border border-slate-100 text-slate-700 text-sm leading-relaxed">
+                                                {user.bio}
+                                            </div>
+                                        ) : (
+                                            <div className="text-slate-400 italic text-sm">No summary available.</div>
+                                        )}
+                                    </div>
+
+                                    {/* Skills */}
+                                    <div>
+                                        <h4 className="text-xs font-bold text-slate-400 uppercase tracking-wider mb-3">Skills</h4>
+                                        {user.skills ? (
                                             <div className="flex flex-wrap gap-2">
-                                                {user.skills.split(',').map((skill, i) => (
-                                                    <span key={i} className="px-3 py-1 bg-indigo-50 text-indigo-700 rounded-full text-sm font-medium border border-indigo-100">
+                                                {user.skills.split(/,/).map((skill, i) => (
+                                                    <span key={i} className="px-3 py-1 bg-indigo-50 text-indigo-700 border border-indigo-100 rounded-full text-xs font-semibold">
                                                         {skill.trim()}
                                                     </span>
                                                 ))}
                                             </div>
-                                        </div>
-                                    )}
-                                    {user.experience && (
-                                        <div>
-                                            <h3 className="text-sm font-bold text-slate-500 uppercase tracking-wide mb-2">Experience</h3>
-                                            <p className="text-slate-700 bg-slate-50 p-4 rounded-lg border border-slate-100 text-sm leading-relaxed whitespace-pre-wrap">{user.experience}</p>
-                                        </div>
-                                    )}
-                                    {user.projects && (
-                                        <div>
-                                            <h3 className="text-sm font-bold text-slate-500 uppercase tracking-wide mb-2">Projects</h3>
-                                            <p className="text-slate-700 bg-slate-50 p-4 rounded-lg border border-slate-100 text-sm leading-relaxed whitespace-pre-wrap">{user.projects}</p>
-                                        </div>
-                                    )}
-                                </div>
-                            ) : (
-                                <div className="text-center py-8 bg-slate-50 rounded-xl border border-slate-100 border-dashed">
-                                    <p className="text-slate-500 mb-2">No resume data found.</p>
-                                    <p className="text-sm text-slate-400">Upload your resume to automatically populate your profile.</p>
-                                </div>
-                            )}
-                        </div>
+                                        ) : (
+                                            <div className="text-slate-400 italic text-sm">No skills found.</div>
+                                        )}
+                                    </div>
 
-                        {/* Analysis Section */}
-                        <div className="border-t border-slate-100 pt-8 mb-8">
-                            <h2 className="text-xl font-bold text-slate-800 mb-6">Profile Analysis</h2>
+                                    {/* Experience */}
+                                    <div>
+                                        <h4 className="text-xs font-bold text-slate-400 uppercase tracking-wider mb-3">Experience</h4>
+                                        {user.experience ? (
+                                            <div className="bg-white border border-slate-100 rounded-lg p-4 text-sm text-slate-600 whitespace-pre-line">
+                                                {user.experience}
+                                            </div>
+                                        ) : (
+                                            <div className="text-slate-400 italic text-sm">No experience listed.</div>
+                                        )}
+                                    </div>
 
-                            <div className="bg-slate-50 p-6 rounded-xl border border-slate-100 mb-6">
-                                <label className="block text-sm font-medium text-slate-700 mb-2">Target Role</label>
-                                <div className="flex gap-4">
-                                    <input
-                                        type="text"
-                                        value={targetRole}
-                                        onChange={(e) => setTargetRole(e.target.value)}
-                                        className="input flex-1"
-                                        placeholder="e.g. Full Stack Developer, Product Manager"
-                                    />
-                                    <button
-                                        onClick={handleAnalyze}
-                                        disabled={analyzing}
-                                        className="btn btn-primary bg-indigo-600 text-white"
-                                    >
-                                        {analyzing ? 'Analyzing...' : 'Analyze Profile'}
-                                    </button>
+                                    {/* Projects */}
+                                    <div>
+                                        <h4 className="text-xs font-bold text-slate-400 uppercase tracking-wider mb-3">Projects</h4>
+                                        {user.projects ? (
+                                            <div className="bg-white border border-slate-100 rounded-lg p-4 text-sm text-slate-600 whitespace-pre-line">
+                                                {user.projects}
+                                            </div>
+                                        ) : (
+                                            <div className="text-slate-400 italic text-sm">No projects listed.</div>
+                                        )}
+                                    </div>
                                 </div>
-                                {analysisMessage.text && (
-                                    <p className={`mt-3 text-sm ${analysisMessage.type === 'error' ? 'text-red-600' : 'text-slate-600'}`}>
-                                        {analysisMessage.text}
-                                    </p>
+                            </div>
+                        )}
+
+                        {/* TAB CONTENT: Analysis */}
+                        {activeTab === 'analysis' && (
+                            <div className="space-y-6 animate-fade-in">
+                                {/* Input Card */}
+                                <div className="bg-white rounded-xl shadow-sm border border-slate-200 p-6">
+                                    <h3 className="text-lg font-bold text-slate-900 mb-4 flex items-center">
+                                        <TrendingUp className="w-5 h-5 mr-2 text-indigo-600" />
+                                        Job Match Analysis
+                                    </h3>
+
+                                    <div className="flex flex-col sm:flex-row gap-3">
+                                        <div className="flex-1">
+                                            <label className="sr-only">Target Role</label>
+                                            <input
+                                                type="text"
+                                                value={targetRole}
+                                                onChange={(e) => setTargetRole(e.target.value)}
+                                                placeholder="Enter target job title (e.g. Frontend Developer)"
+                                                className="block w-full rounded-lg border-slate-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 px-4 py-2.5 border text-sm"
+                                            />
+                                        </div>
+                                        <button
+                                            onClick={handleAnalyze}
+                                            disabled={analyzing}
+                                            className="inline-flex justify-center items-center px-6 py-2.5 border border-transparent rounded-lg shadow-sm text-sm font-medium text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 disabled:opacity-70 disabled:cursor-not-allowed transition-all"
+                                        >
+                                            {analyzing ? (
+                                                <>
+                                                    <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin mr-2"></div>
+                                                    Analyzing...
+                                                </>
+                                            ) : 'Analyze Match'}
+                                        </button>
+                                    </div>
+                                    {analysisMessage.text && (
+                                        <p className={`mt-2 text-sm ${analysisMessage.type === 'error' ? 'text-red-500' : 'text-slate-500'}`}>
+                                            {analysisMessage.text}
+                                        </p>
+                                    )}
+                                </div>
+
+                                {/* Results Card */}
+                                {analysisResult && (
+                                    <div className="bg-white rounded-xl shadow-sm border border-slate-200 overflow-hidden">
+                                        <div className="border-b border-slate-100 p-6 bg-slate-50 flex flex-wrap justify-between items-center gap-4">
+                                            <div>
+                                                <div className="text-xs font-bold text-slate-400 uppercase tracking-wide">Overall Match Score</div>
+                                                <div className="flex items-baseline gap-2">
+                                                    <span className={`text-4xl font-extrabold ${analysisResult.matchScore >= 80 ? 'text-green-600' : analysisResult.matchScore >= 50 ? 'text-yellow-600' : 'text-red-600'
+                                                        }`}>
+                                                        {analysisResult.matchScore}
+                                                    </span>
+                                                    <span className="text-slate-400 text-lg">/ 100</span>
+                                                </div>
+                                            </div>
+                                            {analysisResult.id && (
+                                                <button onClick={downloadReport} className="inline-flex items-center px-3 py-1.5 border border-slate-300 shadow-sm text-xs font-medium rounded-md text-slate-700 bg-white hover:bg-slate-50">
+                                                    <Download className="w-3.5 h-3.5 mr-1.5" />
+                                                    Download Report
+                                                </button>
+                                            )}
+                                        </div>
+
+                                        <div className="p-6 space-y-8">
+                                            {analysisResult.summary && (
+                                                <div className="prose prose-sm max-w-none text-slate-600">
+                                                    <p>{analysisResult.summary}</p>
+                                                </div>
+                                            )}
+
+                                            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                                                {/* Strengths */}
+                                                <div>
+                                                    <h4 className="flex items-center text-sm font-bold text-green-700 mb-3">
+                                                        <CheckCircle className="w-4 h-4 mr-2" /> Key Strengths
+                                                    </h4>
+                                                    <ul className="space-y-2">
+                                                        {analysisResult.strengths?.map((item, i) => (
+                                                            <li key={i} className="flex items-start text-sm text-slate-600">
+                                                                <span className="w-1.5 h-1.5 bg-green-400 rounded-full mt-1.5 mr-2 flex-shrink-0"></span>
+                                                                {item}
+                                                            </li>
+                                                        ))}
+                                                    </ul>
+                                                </div>
+
+                                                {/* Weaknesses */}
+                                                <div>
+                                                    <h4 className="flex items-center text-sm font-bold text-red-700 mb-3">
+                                                        <AlertCircle className="w-4 h-4 mr-2" /> Areas for Improvement
+                                                    </h4>
+                                                    <ul className="space-y-2">
+                                                        {analysisResult.weaknesses?.map((item, i) => (
+                                                            <li key={i} className="flex items-start text-sm text-slate-600">
+                                                                <span className="w-1.5 h-1.5 bg-red-400 rounded-full mt-1.5 mr-2 flex-shrink-0"></span>
+                                                                {item}
+                                                            </li>
+                                                        ))}
+                                                    </ul>
+                                                </div>
+                                            </div>
+
+                                            {/* Tips */}
+                                            {analysisResult.improvementTips?.length > 0 && (
+                                                <div className="bg-indigo-50 rounded-lg p-5 border border-indigo-100">
+                                                    <h4 className="flex items-center text-sm font-bold text-indigo-800 mb-3">
+                                                        <TrendingUp className="w-4 h-4 mr-2" /> Improvement Tips
+                                                    </h4>
+                                                    <ul className="space-y-2">
+                                                        {analysisResult.improvementTips.map((tip, i) => (
+                                                            <li key={i} className="flex items-start text-sm text-indigo-900">
+                                                                <span className="font-bold mr-2">{i + 1}.</span>
+                                                                {tip}
+                                                            </li>
+                                                        ))}
+                                                    </ul>
+                                                </div>
+                                            )}
+                                        </div>
+                                    </div>
                                 )}
                             </div>
+                        )}
 
-                            {analysisResult && (
-                                <div className="space-y-6 animate-in fade-in slide-in-from-bottom-4 duration-500">
-                                    {/* Match Score */}
-                                    <div className="bg-white p-6 rounded-xl border border-slate-200 shadow-sm">
-                                        <div className="flex items-center justify-between mb-4">
-                                            <h3 className="text-lg font-bold text-slate-800">Match Score</h3>
-                                            <div className="flex items-center gap-4">
-                                                {analysisResult.id && (
-                                                    <button
-                                                        onClick={async () => {
-                                                            try {
-                                                                const response = await api.get(`/resume/analyze/${analysisResult.id}/download`, {
-                                                                    responseType: 'blob'
-                                                                });
-                                                                const url = window.URL.createObjectURL(new Blob([response.data]));
-                                                                const link = document.createElement('a');
-                                                                link.href = url;
-                                                                link.setAttribute('download', 'Analysis_Report.docx');
-                                                                document.body.appendChild(link);
-                                                                link.click();
-                                                                link.remove();
-                                                            } catch (error) {
-                                                                console.error("Download failed", error);
-                                                                // Fallback or error message could go here
-                                                            }
-                                                        }}
-                                                        className="btn btn-sm btn-outline text-indigo-600 border-indigo-200 hover:bg-indigo-50 flex items-center gap-2"
-                                                    >
-                                                        <span>⬇️</span> Download Report
-                                                    </button>
-                                                )}
-                                                <span className={`text-2xl font-bold ${analysisResult.matchScore >= 80 ? 'text-green-600' :
-                                                    analysisResult.matchScore >= 50 ? 'text-yellow-600' : 'text-red-600'
-                                                    }`}>
-                                                    {analysisResult.matchScore}%
-                                                </span>
-                                            </div>
-                                        </div>
-                                        <div className="w-full bg-slate-100 rounded-full h-2.5">
-                                            <div
-                                                className={`h-2.5 rounded-full ${analysisResult.matchScore >= 80 ? 'bg-green-500' :
-                                                    analysisResult.matchScore >= 50 ? 'bg-yellow-500' : 'bg-red-500'
-                                                    }`}
-                                                style={{ width: `${analysisResult.matchScore}%` }}
-                                            ></div>
-                                        </div>
-                                    </div>
-
-                                    {/* Summary */}
-                                    {analysisResult.summary && (
-                                        <div className="bg-blue-50 p-6 rounded-xl border border-blue-100">
-                                            <h3 className="text-lg font-bold text-blue-800 mb-2">Executive Summary</h3>
-                                            <p className="text-blue-900 text-sm leading-relaxed">{analysisResult.summary}</p>
-                                        </div>
-                                    )}
-
-                                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                                        {/* Strengths */}
-                                        <div className="bg-green-50 p-6 rounded-xl border border-green-100">
-                                            <h3 className="text-sm font-bold text-green-800 uppercase tracking-wide mb-4">Strengths</h3>
-                                            <ul className="space-y-2">
-                                                {analysisResult.strengths?.map((item, i) => (
-                                                    <li key={i} className="flex items-start gap-2 text-green-700 text-sm">
-                                                        <span className="mt-1">✓</span>
-                                                        <span>{item}</span>
-                                                    </li>
-                                                ))}
-                                            </ul>
-                                        </div>
-
-                                        {/* Weaknesses */}
-                                        <div className="bg-red-50 p-6 rounded-xl border border-red-100">
-                                            <h3 className="text-sm font-bold text-red-800 uppercase tracking-wide mb-4">Gaps & Weaknesses</h3>
-                                            <ul className="space-y-2">
-                                                {analysisResult.weaknesses?.map((item, i) => (
-                                                    <li key={i} className="flex items-start gap-2 text-red-700 text-sm">
-                                                        <span className="mt-1">•</span>
-                                                        <span>{item}</span>
-                                                    </li>
-                                                ))}
-                                            </ul>
-                                        </div>
-                                    </div>
-
-                                    {/* Missing Keywords */}
-                                    {analysisResult.missingKeywords?.length > 0 && (
-                                        <div className="bg-yellow-50 p-6 rounded-xl border border-yellow-100">
-                                            <h3 className="text-sm font-bold text-yellow-800 uppercase tracking-wide mb-4">Missing Keywords</h3>
-                                            <div className="flex flex-wrap gap-2">
-                                                {analysisResult.missingKeywords.map((keyword, i) => (
-                                                    <span key={i} className="px-3 py-1 bg-yellow-100 text-yellow-800 rounded-full text-sm font-medium border border-yellow-200">
-                                                        {keyword}
-                                                    </span>
-                                                ))}
-                                            </div>
-                                        </div>
-                                    )}
-
-                                    {/* Improvement Tips */}
-                                    <div className="bg-indigo-50 p-6 rounded-xl border border-indigo-100">
-                                        <h3 className="text-sm font-bold text-indigo-800 uppercase tracking-wide mb-4">How to Improve</h3>
-                                        <ul className="space-y-3">
-                                            {analysisResult.improvementTips?.map((item, i) => (
-                                                <li key={i} className="flex items-start gap-3 text-indigo-900 text-sm bg-white p-3 rounded-lg border border-indigo-100">
-                                                    <span className="font-bold text-indigo-500">{i + 1}.</span>
-                                                    <span>{item}</span>
-                                                </li>
-                                            ))}
-                                        </ul>
-                                    </div>
-
-                                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                                        {/* Recommended Projects */}
-                                        {analysisResult.recommendedProjects?.length > 0 && (
-                                            <div className="bg-purple-50 p-6 rounded-xl border border-purple-100">
-                                                <h3 className="text-sm font-bold text-purple-800 uppercase tracking-wide mb-4">Recommended Projects</h3>
-                                                <ul className="space-y-3">
-                                                    {analysisResult.recommendedProjects.map((project, i) => (
-                                                        <li key={i} className="flex items-start gap-2 text-purple-900 text-sm bg-white p-3 rounded-lg border border-purple-100">
-                                                            <span className="mt-1">🚀</span>
-                                                            <span>{project}</span>
-                                                        </li>
-                                                    ))}
-                                                </ul>
-                                            </div>
-                                        )}
-
-                                        {/* Interview Questions */}
-                                        {analysisResult.interviewQuestions?.length > 0 && (
-                                            <div className="bg-orange-50 p-6 rounded-xl border border-orange-100">
-                                                <h3 className="text-sm font-bold text-orange-800 uppercase tracking-wide mb-4">Interview Prep</h3>
-                                                <ul className="space-y-3">
-                                                    {analysisResult.interviewQuestions.map((q, i) => (
-                                                        <li key={i} className="text-orange-900 text-sm bg-white p-3 rounded-lg border border-orange-100 italic">
-                                                            " {q} "
-                                                        </li>
-                                                    ))}
-                                                </ul>
-                                            </div>
-                                        )}
-                                    </div>
-                                </div>
-                            )}
-                        </div>
-
-                        <div className="border-t border-slate-100 pt-8">
-                            <button
-                                onClick={handleLogout}
-                                className="btn btn-secondary text-red-600 border-red-200 hover:bg-red-50"
-                            >
-                                Sign Out
-                            </button>
-                        </div>
-                    </>
-                )}
+                    </div>
+                </div>
             </div>
         </div>
     );
