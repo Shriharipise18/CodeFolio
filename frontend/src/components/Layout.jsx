@@ -18,7 +18,7 @@ const Layout = () => {
             <header className="app-navbar">
                 <div className="app-navbar-container">
                     <Link to="/" className="app-navbar-brand" style={{ display: 'flex', alignItems: 'center' }}>
-                        <img src={Logo} alt="CodeFolio" style={{ height: '80px', width: 'auto', display: 'block' }} />
+                        <img src={Logo} alt="CodeFolio" style={{ height: '60px', width: 'auto', display: 'block' }} />
                     </Link>
 
                     <nav className="app-navbar-menu">
