@@ -20,27 +20,32 @@ public class PromptBuilder {
 
         public static String buildAnalysisPrompt(String role, String skills, String experience, String projects) {
                 return String.format(
-                                "Analyze the following resume details for the target role of '%s'.\n" +
+                                "Act as a critical Senior Technical Recruiter. Analyze the candidate's resume for the target role of '%s'.\n"
+                                                +
+                                                "Candidate Data:\n" +
                                                 "Skills: %s\n" +
                                                 "Experience: %s\n" +
                                                 "Projects: %s\n" +
                                                 "\n" +
+                                                "CRITICAL SCORING RULES:\n" +
+                                                "1. Be harsh and realistic. Do NOT be polite. Do NOT give participation awards.\n"
+                                                +
+                                                "2. If the 'Skills' or 'Projects' sections are brief, vague, or empty, the score MUST be low (e.g., 10-40).\n"
+                                                +
+                                                "3. A score of 90+ is reserved ONLY for perfect matches with extensive, relevant detailed experience.\n"
+                                                +
+                                                "4. 'sectionScores' must differentiate. Do not give the same score for everything.\n"
+                                                +
+                                                "\n" +
                                                 "Respond strictly in JSON format with the following keys:\n" +
-                                                "- 'matchScore': Integer between 0-100 indicating fit for the role.\n" +
-                                                "- 'summary': A concise 2-3 sentence executive summary of the candidate's fit.\n"
+                                                "- 'matchScore': Integer (0-100) indicating overall fit.\n" +
+                                                "- 'summary': A concise, critical executive summary (2 sentences).\n" +
+                                                "- 'sectionScores': JSON Object with integer scores (0-100) for keys: 'Skills', 'Projects'. (Ensure these vary based on input quality).\n"
                                                 +
-                                                "- 'sectionScores': JSON Object with integer scores (0-100) for keys: 'Bio', 'Skills', 'Projects', 'Experience'.\n"
+                                                "- 'strengths': JSON Array of strings (What actually matches).\n" +
+                                                "- 'weaknesses': JSON Array of strings (Be specific about what is missing).\n"
                                                 +
-                                                "- 'strengths': JSON Array of strings listing key strengths.\n" +
-                                                "- 'weaknesses': JSON Array of strings listing gaps or weaknesses.\n" +
-                                                "- 'missingKeywords': JSON Array of strings listing specific technical skills/keywords missing from the profile for this role.\n"
-                                                +
-                                                "- 'recommendedProjects': JSON Array of strings listing specific project ideas to build to improve the portfolio.\n"
-                                                +
-                                                "- 'interviewQuestions': JSON Array of strings listing 3 likely technical interview questions based on the profile's weak points.\n"
-                                                +
-                                                "- 'improvementTips': JSON Array of actionable tips to improve employability for this role.\n"
-                                                +
+                                                "- 'improvementTips': JSON Array of actionable advice.\n" +
                                                 "\n" +
                                                 "Output ONLY valid JSON. No markdown formatting.",
                                 role, skills, experience, projects);
